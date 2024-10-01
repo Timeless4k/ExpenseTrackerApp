@@ -1,3 +1,5 @@
+using ExpenseTrackerApp.Views;  // Add this to reference the Views folder where LoginForm is located
+
 namespace ExpenseTrackerApp
 {
     internal static class Program
@@ -11,7 +13,7 @@ namespace ExpenseTrackerApp
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new Form1());
+            Application.Run(new MainForm());  // Start the application with the LoginForm
         }
     }
 }
