@@ -1,4 +1,6 @@
-using ExpenseTrackerApp.Views;  // Add this to reference the Views folder where LoginForm is located
+using System;
+using System.Windows.Forms;
+using ExpenseTrackerApp.Views;  // Make sure to reference Views where WelcomeForm is located
 
 namespace ExpenseTrackerApp
 {
@@ -13,7 +15,9 @@ namespace ExpenseTrackerApp
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new MainForm());  // Start the application with the LoginForm
+
+            // Start with WelcomeForm as the initial form
+            Application.Run(new WelcomeForm());
         }
     }
 }

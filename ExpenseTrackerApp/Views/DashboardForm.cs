@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace ExpenseTrackerApp.Views
 {
-    public partial class MainForm : Form
+    public partial class DashboardForm : Form
     {
-        public MainForm()
+        public DashboardForm()
         {
             InitializeComponent();
         }
