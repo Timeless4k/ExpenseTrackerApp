@@ -15,11 +15,12 @@ namespace ExpenseTrackerApp.Views
         // Event handler for the Sign Up button click
         private void BtnSignUp_Click(object sender, EventArgs e)
         {
-            string username = txtUsername.Text;
+            string firstName = txtFirstName.Text;
+            string lastName = txtLastName.Text;
             string email = txtEmail.Text;
             string password = txtPassword.Text;
 
-            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            if (string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
             {
                 lblMessage.Text = "All fields are required!";
                 return;
@@ -29,7 +30,7 @@ namespace ExpenseTrackerApp.Views
             {
                 var userRepository = new UserRepository(context);
 
-                bool result = userRepository.CreateUser(username, email, password);
+                bool result = userRepository.CreateUser(firstName, lastName, email, password);
 
                 if (result)
                 {
@@ -45,7 +46,7 @@ namespace ExpenseTrackerApp.Views
                 else
                 {
                     lblMessage.ForeColor = System.Drawing.Color.Red;
-                    lblMessage.Text = "Username or email already exists!";
+                    lblMessage.Text = "Email already exists!";
                 }
             }
         }
@@ -53,7 +54,8 @@ namespace ExpenseTrackerApp.Views
         // Clear input fields after success
         private void ClearFields()
         {
-            txtUsername.Clear();
+            txtFirstName.Clear();
+            txtLastName.Clear();
             txtEmail.Clear();
             txtPassword.Clear();
         }

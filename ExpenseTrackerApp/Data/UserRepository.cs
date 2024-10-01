@@ -4,7 +4,7 @@ using System.Text;
 using ExpenseTrackerApp.Data;
 using ExpenseTrackerApp.Models;
 
-namespace ExpenseTrackerApp.Controllers
+namespace ExpenseTrackerApp.Data
 {
     public class UserRepository
     {
@@ -16,12 +16,12 @@ namespace ExpenseTrackerApp.Controllers
         }
 
         // Method to create a new user (Sign-Up)
-        public bool CreateUser(string username, string email, string password)
+        public bool CreateUser(string firstName, string lastName, string email, string password)
         {
-            // Check if the user with the same username or email already exists
-            if (_context.Users.Any(u => u.Username == username || u.Email == email))
+            // Check if the user with the same email already exists
+            if (_context.Users.Any(u => u.Email == email))
             {
-                return false; // Username or email already exists
+                return false; // Email already exists
             }
 
             // Hash the password before saving to the database
@@ -30,7 +30,8 @@ namespace ExpenseTrackerApp.Controllers
             // Create a new user object
             var user = new User
             {
-                Username = username,
+                FirstName = firstName,
+                LastName = lastName,
                 Email = email,
                 PasswordHash = passwordHash
             };
@@ -42,22 +43,7 @@ namespace ExpenseTrackerApp.Controllers
             return true; // User created successfully
         }
 
-        // Method to validate user credentials (Login) using username and password
-        public bool ValidateUser(string username, string password)
-        {
-            // Fetch the user by username
-            var user = _context.Users.SingleOrDefault(u => u.Username == username);
-
-            // If user doesn't exist or password doesn't match, return false
-            if (user == null || !VerifyPassword(password, user.PasswordHash))
-            {
-                return false;
-            }
-
-            return true; // Credentials are valid
-        }
-
-        // Method to validate user credentials using email and password
+        // Method to validate user credentials (Login) using email and password
         public User GetUserByEmailAndPassword(string email, string password)
         {
             // Fetch the user by email

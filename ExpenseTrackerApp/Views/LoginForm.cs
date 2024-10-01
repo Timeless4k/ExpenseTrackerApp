@@ -33,6 +33,8 @@ namespace ExpenseTrackerApp.Views
                 {
                     lblMessage.ForeColor = System.Drawing.Color.Green;
                     lblMessage.Text = "Login successful!";
+                    SessionManager.SetCurrentUser(user);
+
                     // Redirect to the DashboardForm after successful login
                     DashboardForm dashboardForm = new DashboardForm();
                     dashboardForm.Show();

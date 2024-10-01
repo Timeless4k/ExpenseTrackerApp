@@ -7,9 +7,10 @@ namespace ExpenseTrackerApp.Data
 {
     public class ExpenseContext : DbContext
     {
-        public DbSet<Expense> Expenses { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Budget> Budgets { get; set; }
+        public DbSet<Expense> Expenses { get; set; }
+        public DbSet<Income> Income { get; set; }  
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -24,7 +25,7 @@ namespace ExpenseTrackerApp.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Define relationships between User, Expense, and Budget models
+            // Define relationships between User, Expense, Budget, and Income models
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Expenses)
                 .WithOne(e => e.User)
@@ -34,6 +35,11 @@ namespace ExpenseTrackerApp.Data
                 .HasMany(u => u.Budgets)
                 .WithOne(b => b.User)
                 .HasForeignKey(b => b.UserId);
+
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.Incomes)
+                .WithOne(i => i.User)
+                .HasForeignKey(i => i.UserId);
         }
     }
 }

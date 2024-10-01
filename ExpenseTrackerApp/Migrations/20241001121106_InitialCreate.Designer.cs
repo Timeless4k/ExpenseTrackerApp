@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ExpenseTrackerApp.Migrations
 {
     [DbContext(typeof(ExpenseContext))]
-    [Migration("20241001073640_InitialCreate")]
+    [Migration("20241001121106_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -74,6 +74,32 @@ namespace ExpenseTrackerApp.Migrations
                     b.ToTable("Expenses");
                 });
 
+            modelBuilder.Entity("ExpenseTrackerApp.Models.Income", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Income");
+                });
+
             modelBuilder.Entity("ExpenseTrackerApp.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -84,11 +110,15 @@ namespace ExpenseTrackerApp.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("PasswordHash")
+                    b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Username")
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("longtext");
 
@@ -117,11 +147,24 @@ namespace ExpenseTrackerApp.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("ExpenseTrackerApp.Models.Income", b =>
+                {
+                    b.HasOne("ExpenseTrackerApp.Models.User", "User")
+                        .WithMany("Incomes")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("ExpenseTrackerApp.Models.User", b =>
                 {
                     b.Navigation("Budgets");
 
                     b.Navigation("Expenses");
+
+                    b.Navigation("Incomes");
                 });
 #pragma warning restore 612, 618
         }
