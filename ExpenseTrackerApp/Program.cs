@@ -17,6 +17,7 @@ namespace ExpenseTrackerApp
             ApplicationConfiguration.Initialize();
 
             // Start with WelcomeForm as the initial form
+            
             Application.Run(new WelcomeForm());
         }
     }
