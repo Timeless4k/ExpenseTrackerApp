@@ -31,7 +31,7 @@ namespace ExpenseTrackerApp.Data
                 Date = date
             };
 
-            _context.Income.Add(income);  // Corrected to match the table name 'Income'
+            _context.Income.Add(income);
             _context.SaveChanges();
             return true;
         }
@@ -39,36 +39,26 @@ namespace ExpenseTrackerApp.Data
         // Method to Get Incomes by User ID
         public List<Income> GetIncomesByUserId(int userId)
         {
-            var incomes = _context.Income.Where(i => i.UserId == userId).ToList();
-
-            // If no incomes are found, return an empty list
-            if (incomes == null || incomes.Count == 0)
-            {
-                return new List<Income>(); // Return empty list if no incomes are found
-            }
-
-            return incomes;
+            return _context.Income.Where(i => i.UserId == userId).ToList() ?? new List<Income>();
         }
 
-        // Method to Get Recent Incomes by User ID (limit to recent 5 or custom limit)
-        public List<Income> GetRecentIncomesByUserId(int userId, int limit = 5)
+        // Method to Get Recent Incomes by User ID
+        public List<Income> GetRecentIncomesByUserId(int userId)
         {
-            var incomes = _context.Income
-                                  .Where(i => i.UserId == userId)
-                                  .OrderByDescending(i => i.Date)
-                                  .Take(limit)
-                                  .ToList();
-
-            // If no incomes are found, return an empty list
-            if (incomes == null || incomes.Count == 0)
-            {
-                return new List<Income>(); // Return empty list if no incomes are found
-            }
-
-            return incomes;
+            return _context.Income
+                           .Where(i => i.UserId == userId)
+                           .OrderByDescending(i => i.Date)
+                           .Take(5)  // Get the last 5 recent incomes
+                           .ToList();
         }
 
-        // Method to Update Income
+        // Method to Get Income by Income ID
+        public Income GetIncomeById(int incomeId)
+        {
+            return _context.Income.SingleOrDefault(i => i.Id == incomeId);
+        }
+
+        // Method to Update Income (using parameters)
         public bool UpdateIncome(int incomeId, decimal amount, string source, DateTime date)
         {
             var income = _context.Income.SingleOrDefault(i => i.Id == incomeId);
@@ -80,6 +70,23 @@ namespace ExpenseTrackerApp.Data
             income.Amount = amount;
             income.Source = source;
             income.Date = date;
+
+            _context.SaveChanges();
+            return true;
+        }
+
+        // Overloaded Method to Update Income with Income Object
+        public bool UpdateIncome(Income updatedIncome)
+        {
+            var income = _context.Income.SingleOrDefault(i => i.Id == updatedIncome.Id);
+            if (income == null)
+            {
+                return false; // Income not found
+            }
+
+            income.Amount = updatedIncome.Amount;
+            income.Source = updatedIncome.Source;
+            income.Date = updatedIncome.Date;
 
             _context.SaveChanges();
             return true;

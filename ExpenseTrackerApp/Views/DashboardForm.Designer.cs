@@ -4,7 +4,8 @@
     {
         private System.Windows.Forms.Label lblTotalBudget;
         private System.Windows.Forms.Label lblRemainingBudget;
-        private System.Windows.Forms.ListBox lstExpenses;
+        private System.Windows.Forms.DataGridView dgvExpenses;   // DataGridView for displaying recent expenses
+        private System.Windows.Forms.DataGridView dgvIncome;     // DataGridView for displaying recent incomes
         private System.Windows.Forms.Button btnAddExpense;
         private System.Windows.Forms.Button btnManageBudgets;
         private System.Windows.Forms.Button btnLogout;
@@ -12,27 +13,24 @@
         private System.Windows.Forms.Panel pnlHeader;
         private System.Windows.Forms.Label lblDashboardTitle;
         private System.Windows.Forms.Button btnAddIncome;   // Button for adding income
-        private System.Windows.Forms.ListBox lstIncome;   // Listbox for displaying recent incomes
         private System.Windows.Forms.Label lblRecentIncome;  // Label for income section
 
         private void InitializeComponent()
         {
             this.lblTotalBudget = new System.Windows.Forms.Label();
             this.lblRemainingBudget = new System.Windows.Forms.Label();
-            this.lstExpenses = new System.Windows.Forms.ListBox();
+            this.dgvExpenses = new System.Windows.Forms.DataGridView();
+            this.dgvIncome = new System.Windows.Forms.DataGridView();
             this.btnAddExpense = new System.Windows.Forms.Button();
             this.btnManageBudgets = new System.Windows.Forms.Button();
             this.btnLogout = new System.Windows.Forms.Button();
             this.lblRecentExpenses = new System.Windows.Forms.Label();
             this.pnlHeader = new System.Windows.Forms.Panel();
             this.lblDashboardTitle = new System.Windows.Forms.Label();
-            this.btnAddIncome = new System.Windows.Forms.Button();  // AddIncome button
-            this.lstIncome = new System.Windows.Forms.ListBox();    // List for income
-            this.lblRecentIncome = new System.Windows.Forms.Label();  // Label for income
-            this.pnlHeader.SuspendLayout();
-            this.SuspendLayout();
+            this.btnAddIncome = new System.Windows.Forms.Button();
+            this.lblRecentIncome = new System.Windows.Forms.Label();
 
-            // Header Panel
+            // pnlHeader
             this.pnlHeader.BackColor = System.Drawing.Color.FromArgb(45, 45, 48);
             this.pnlHeader.Controls.Add(this.lblDashboardTitle);
             this.pnlHeader.Dock = System.Windows.Forms.DockStyle.Top;
@@ -41,8 +39,8 @@
             this.pnlHeader.Size = new System.Drawing.Size(800, 60);
             this.pnlHeader.TabIndex = 0;
 
-            // Dashboard Title
-            this.lblDashboardTitle.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            // lblDashboardTitle
+            this.lblDashboardTitle.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Bold);
             this.lblDashboardTitle.ForeColor = System.Drawing.Color.White;
             this.lblDashboardTitle.Location = new System.Drawing.Point(12, 9);
             this.lblDashboardTitle.Name = "lblDashboardTitle";
@@ -51,66 +49,70 @@
             this.lblDashboardTitle.Text = "Dashboard";
             this.lblDashboardTitle.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
 
-            // Total Budget Label
+            // lblTotalBudget
             this.lblTotalBudget.AutoSize = true;
-            this.lblTotalBudget.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lblTotalBudget.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
             this.lblTotalBudget.Location = new System.Drawing.Point(50, 80);
             this.lblTotalBudget.Name = "lblTotalBudget";
             this.lblTotalBudget.Size = new System.Drawing.Size(112, 21);
             this.lblTotalBudget.TabIndex = 1;
             this.lblTotalBudget.Text = "Total Budget: ";
 
-            // Remaining Budget Label
+            // lblRemainingBudget
             this.lblRemainingBudget.AutoSize = true;
-            this.lblRemainingBudget.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lblRemainingBudget.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
             this.lblRemainingBudget.Location = new System.Drawing.Point(50, 120);
             this.lblRemainingBudget.Name = "lblRemainingBudget";
             this.lblRemainingBudget.Size = new System.Drawing.Size(158, 21);
             this.lblRemainingBudget.TabIndex = 2;
             this.lblRemainingBudget.Text = "Remaining Budget: ";
 
-            // Recent Expenses Label
+            // lblRecentExpenses
             this.lblRecentExpenses.AutoSize = true;
-            this.lblRecentExpenses.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lblRecentExpenses.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
             this.lblRecentExpenses.Location = new System.Drawing.Point(50, 160);
             this.lblRecentExpenses.Name = "lblRecentExpenses";
             this.lblRecentExpenses.Size = new System.Drawing.Size(136, 21);
             this.lblRecentExpenses.TabIndex = 3;
             this.lblRecentExpenses.Text = "Recent Expenses:";
 
-            // Expenses List
-            this.lstExpenses.BackColor = System.Drawing.Color.White;
-            this.lstExpenses.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lstExpenses.FormattingEnabled = true;
-            this.lstExpenses.ItemHeight = 17;
-            this.lstExpenses.Location = new System.Drawing.Point(50, 190);
-            this.lstExpenses.Name = "lstExpenses";
-            this.lstExpenses.Size = new System.Drawing.Size(500, 140);
-            this.lstExpenses.TabIndex = 4;
+            // dgvExpenses
+            this.dgvExpenses.AllowUserToAddRows = false;
+            this.dgvExpenses.AllowUserToDeleteRows = false;
+            this.dgvExpenses.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dgvExpenses.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvExpenses.Location = new System.Drawing.Point(50, 190);
+            this.dgvExpenses.Name = "dgvExpenses";
+            this.dgvExpenses.ReadOnly = true;
+            this.dgvExpenses.Size = new System.Drawing.Size(500, 140);
+            this.dgvExpenses.TabIndex = 4;
 
-            // Recent Income Label 
+            // lblRecentIncome
             this.lblRecentIncome.AutoSize = true;
-            this.lblRecentIncome.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lblRecentIncome.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
             this.lblRecentIncome.Location = new System.Drawing.Point(50, 340);
             this.lblRecentIncome.Name = "lblRecentIncome";
             this.lblRecentIncome.Size = new System.Drawing.Size(122, 21);
             this.lblRecentIncome.TabIndex = 5;
             this.lblRecentIncome.Text = "Recent Income:";
 
-            // Income List 
-            this.lstIncome.BackColor = System.Drawing.Color.White;
-            this.lstIncome.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lstIncome.FormattingEnabled = true;
-            this.lstIncome.ItemHeight = 17;
-            this.lstIncome.Location = new System.Drawing.Point(50, 370);
-            this.lstIncome.Name = "lstIncome";
-            this.lstIncome.Size = new System.Drawing.Size(500, 140);
-            this.lstIncome.TabIndex = 6;
+            // dgvIncome
+            this.dgvIncome.AllowUserToAddRows = false;
+            this.dgvIncome.AllowUserToDeleteRows = false;
+            this.dgvIncome.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dgvIncome.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvIncome.Location = new System.Drawing.Point(50, 370);
+            this.dgvIncome.Name = "dgvIncome";
+            this.dgvIncome.ReadOnly = true;
+            this.dgvIncome.Size = new System.Drawing.Size(500, 140);
+            this.dgvIncome.TabIndex = 6;
+            this.dgvIncome.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvIncome_CellContentClick);
 
-            // Add Expense Button
+
+            // btnAddExpense
             this.btnAddExpense.BackColor = System.Drawing.Color.FromArgb(72, 202, 228);
             this.btnAddExpense.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnAddExpense.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnAddExpense.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnAddExpense.ForeColor = System.Drawing.Color.White;
             this.btnAddExpense.Location = new System.Drawing.Point(50, 530);
             this.btnAddExpense.Name = "btnAddExpense";
@@ -119,10 +121,10 @@
             this.btnAddExpense.Text = "Add Expense";
             this.btnAddExpense.UseVisualStyleBackColor = false;
 
-            // Add Income Button 
+            // btnAddIncome
             this.btnAddIncome.BackColor = System.Drawing.Color.FromArgb(72, 202, 228);
             this.btnAddIncome.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnAddIncome.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnAddIncome.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnAddIncome.ForeColor = System.Drawing.Color.White;
             this.btnAddIncome.Location = new System.Drawing.Point(230, 530);
             this.btnAddIncome.Name = "btnAddIncome";
@@ -130,11 +132,12 @@
             this.btnAddIncome.TabIndex = 8;
             this.btnAddIncome.Text = "Add Income";
             this.btnAddIncome.UseVisualStyleBackColor = false;
+            this.btnAddIncome.Click += new System.EventHandler(this.btnAddIncome_Click);
 
-            // Manage Budgets Button
+            // btnManageBudgets
             this.btnManageBudgets.BackColor = System.Drawing.Color.FromArgb(0, 123, 255);
             this.btnManageBudgets.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnManageBudgets.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnManageBudgets.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnManageBudgets.ForeColor = System.Drawing.Color.White;
             this.btnManageBudgets.Location = new System.Drawing.Point(410, 530);
             this.btnManageBudgets.Name = "btnManageBudgets";
@@ -143,10 +146,10 @@
             this.btnManageBudgets.Text = "Manage Budgets";
             this.btnManageBudgets.UseVisualStyleBackColor = false;
 
-            // Logout Button
+            // btnLogout
             this.btnLogout.BackColor = System.Drawing.Color.FromArgb(255, 87, 34);
             this.btnLogout.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnLogout.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnLogout.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnLogout.ForeColor = System.Drawing.Color.White;
             this.btnLogout.Location = new System.Drawing.Point(590, 530);
             this.btnLogout.Name = "btnLogout";
@@ -155,27 +158,28 @@
             this.btnLogout.Text = "Logout";
             this.btnLogout.UseVisualStyleBackColor = false;
 
-            // DashboardForm Properties
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(800, 600);
+            // Add controls to the form
             this.Controls.Add(this.pnlHeader);
             this.Controls.Add(this.lblRecentIncome);
-            this.Controls.Add(this.lstIncome);
+            this.Controls.Add(this.dgvIncome);
             this.Controls.Add(this.btnLogout);
             this.Controls.Add(this.btnManageBudgets);
             this.Controls.Add(this.btnAddIncome);
             this.Controls.Add(this.btnAddExpense);
-            this.Controls.Add(this.lstExpenses);
+            this.Controls.Add(this.dgvExpenses);
             this.Controls.Add(this.lblRecentExpenses);
             this.Controls.Add(this.lblRemainingBudget);
             this.Controls.Add(this.lblTotalBudget);
+
+            this.ClientSize = new System.Drawing.Size(800, 600);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "DashboardForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Dashboard";
+
             this.pnlHeader.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dgvExpenses)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvIncome)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
         }

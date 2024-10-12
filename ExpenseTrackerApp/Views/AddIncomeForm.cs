@@ -1,55 +1,103 @@
 ﻿using System;
-using System.Windows.Forms;
 using ExpenseTrackerApp.Controllers;
 using ExpenseTrackerApp.Data;
+using ExpenseTrackerApp.Models;
 
 namespace ExpenseTrackerApp.Views
 {
     public partial class AddIncomeForm : Form
     {
-        public AddIncomeForm()
+        private readonly IncomeController _incomeController;
+        private readonly int _userId;
+
+        public AddIncomeForm(int userId)
         {
             InitializeComponent();
+            _userId = userId;
+            _incomeController = new IncomeController(new ExpenseContext());
+            CustomizeUI();
         }
 
-        // Event handler for adding income
+        // Button click event handler to add income
         private void BtnAddIncome_Click(object sender, EventArgs e)
         {
-            string source = txtSource.Text;
-            decimal amount;
-            bool isAmountValid = decimal.TryParse(txtAmount.Text, out amount);
-            DateTime date = dtpDate.Value;
-
-            if (string.IsNullOrEmpty(source) || !isAmountValid || amount <= 0)
+            try
             {
-                lblMessage.Text = "Please provide valid income details!";
-                return;
-            }
+                // Get user inputs
+                string source = txtIncomeSource.Text.Trim();
+                decimal amount = decimal.Parse(txtIncomeAmount.Text.Trim());
+                DateTime date = dtpIncomeDate.Value;
 
-            using (var context = new ExpenseContext())
-            {
-                var incomeRepository = new IncomeRepository(context);
-                bool result = incomeRepository.AddIncome(SessionManager.CurrentUser.Id, amount, source, date);
+                // Call the IncomeController to add the income
+                bool success = _incomeController.AddIncome(_userId, amount, source, date);
 
-                if (result)
+                if (success)
                 {
-                    lblMessage.ForeColor = System.Drawing.Color.Green;
-                    lblMessage.Text = "Income added successfully!";
-                    ClearFields();
+                    MessageBox.Show("Income added successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    ClearFields(); // Reset fields after successful submission
                 }
                 else
                 {
-                    lblMessage.ForeColor = System.Drawing.Color.Red;
-                    lblMessage.Text = "Failed to add income!";
+                    MessageBox.Show("Failed to add income. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("Please enter a valid amount.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
+        // Clears all fields in the form
         private void ClearFields()
         {
-            txtSource.Clear();
-            txtAmount.Clear();
-            dtpDate.Value = DateTime.Today;
+            txtIncomeSource.Clear();
+            txtIncomeAmount.Clear();
+            dtpIncomeDate.Value = DateTime.Now; // Reset date picker to current date
+        }
+
+        // Button click event handler to close the form
+        private void BtnCancel_Click(object sender, EventArgs e)
+        {
+            this.Close(); // Close the form when user cancels
+        }
+
+        // Customize UI to make it more modern
+        private void CustomizeUI()
+        {
+            // Set background color
+            this.BackColor = System.Drawing.Color.White;
+
+            // Customize buttons
+            btnAddIncome.FlatStyle = FlatStyle.Flat;
+            btnAddIncome.BackColor = System.Drawing.Color.SteelBlue;
+            btnAddIncome.ForeColor = System.Drawing.Color.White;
+            btnAddIncome.FlatAppearance.BorderSize = 0;
+            btnAddIncome.Font = new Font("Segoe UI", 10, FontStyle.Bold);
+
+            btnCancel.FlatStyle = FlatStyle.Flat;
+            btnCancel.BackColor = System.Drawing.Color.LightGray;
+            btnCancel.ForeColor = System.Drawing.Color.Black;
+            btnCancel.FlatAppearance.BorderSize = 0;
+            btnCancel.Font = new Font("Segoe UI", 10);
+
+            // Set label and input font
+            foreach (Control control in this.Controls)
+            {
+                if (control is Label)
+                {
+                    control.Font = new Font("Segoe UI", 10);
+                }
+                if (control is TextBox || control is DateTimePicker)
+                {
+                    control.Font = new Font("Segoe UI", 10);
+                    control.BackColor = System.Drawing.Color.WhiteSmoke;
+                    control.ForeColor = System.Drawing.Color.Black;
+                }
+            }
         }
     }
 }
