@@ -56,11 +56,53 @@ namespace ExpenseTrackerApp.Views
                 var expenses = expenseRepository.GetRecentExpensesByUserId(userId);
                 dgvExpenses.DataSource = expenses;
 
+                // Add Edit and Delete buttons to the Expenses DataGridView (if not already added)
+                if (dgvExpenses.Columns["ActionEdit"] == null)
+                {
+                    var btnEditExpense = new DataGridViewButtonColumn
+                    {
+                        HeaderText = "Action",
+                        Name = "ActionEdit",
+                        Text = "Edit",
+                        UseColumnTextForButtonValue = true
+                    };
+                    dgvExpenses.Columns.Insert(0, btnEditExpense);
+                }
+
+                if (dgvExpenses.Columns["ActionDelete"] == null)
+                {
+                    var btnDeleteExpense = new DataGridViewButtonColumn
+                    {
+                        HeaderText = "Action",
+                        Name = "ActionDelete",
+                        Text = "Delete",
+                        UseColumnTextForButtonValue = true
+                    };
+                    dgvExpenses.Columns.Insert(1, btnDeleteExpense);
+                }
+
+                // Hide columns you don't want to show in the Expenses table
+                if (dgvExpenses.Columns["Id"] != null)
+                {
+                    dgvExpenses.Columns["Id"].Visible = false;
+                }
+                if (dgvExpenses.Columns["UserId"] != null)
+                {
+                    dgvExpenses.Columns["UserId"].Visible = false;
+                }
+                if (dgvExpenses.Columns["User"] != null)
+                {
+                    dgvExpenses.Columns["User"].Visible = false;
+                }
+
+                // Set column widths to show full date for Expenses
+                dgvExpenses.Columns["Date"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+
                 // Load and display recent incomes in DataGridView
                 var incomes = incomeRepository.GetRecentIncomesByUserId(userId);
                 dgvIncome.DataSource = incomes;
 
-                // Prevent adding the "Action" column multiple times
+                // Prevent adding the "Action" column multiple times for Income
                 if (dgvIncome.Columns["ActionEdit"] == null)
                 {
                     var btnEditIncome = new DataGridViewButtonColumn
@@ -85,7 +127,7 @@ namespace ExpenseTrackerApp.Views
                     dgvIncome.Columns.Insert(1, btnDeleteIncome);
                 }
 
-                // Hide columns you don't want to show
+                // Hide columns you don't want to show in the Income table
                 if (dgvIncome.Columns["Id"] != null)
                 {
                     dgvIncome.Columns["Id"].Visible = false;
@@ -99,14 +141,17 @@ namespace ExpenseTrackerApp.Views
                     dgvIncome.Columns["User"].Visible = false;
                 }
 
-                // Set column widths to show full date
+                // Set column widths to show full date for Income
                 dgvIncome.Columns["Date"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
             }
         }
 
+        // Event handler for AddExpense button click
         private void btnAddExpense_Click(object sender, EventArgs e)
         {
-            AddExpenseForm addExpenseForm = new AddExpenseForm();
+            // Fetch the current userId from SessionManager and pass it to AddExpenseForm
+            var userId = SessionManager.CurrentUser.Id;
+            AddExpenseForm addExpenseForm = new AddExpenseForm(userId);
             addExpenseForm.Show();
         }
 
@@ -125,7 +170,7 @@ namespace ExpenseTrackerApp.Views
 
         private void dgvIncome_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            // Handle Edit button click in the DataGridView
+            // Handle Edit button click in the DataGridView for Income
             if (e.ColumnIndex == dgvIncome.Columns["ActionEdit"].Index && e.RowIndex >= 0)
             {
                 int incomeId = (int)dgvIncome.Rows[e.RowIndex].Cells["Id"].Value;  // Assuming 'Id' is the Income ID column
@@ -133,7 +178,7 @@ namespace ExpenseTrackerApp.Views
                 editIncomeForm.ShowDialog();  // Open Edit Income form for editing
             }
 
-            // Handle Delete button click in the DataGridView
+            // Handle Delete button click in the DataGridView for Income
             if (e.ColumnIndex == dgvIncome.Columns["ActionDelete"].Index && e.RowIndex >= 0)
             {
                 int incomeId = (int)dgvIncome.Rows[e.RowIndex].Cells["Id"].Value;
@@ -155,6 +200,44 @@ namespace ExpenseTrackerApp.Views
                         else
                         {
                             MessageBox.Show("Failed to delete income.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void dgvExpenses_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            // Handle Edit button click in the DataGridView for Expenses
+            if (e.ColumnIndex == dgvExpenses.Columns["ActionEdit"].Index && e.RowIndex >= 0)
+            {
+                int expenseId = (int)dgvExpenses.Rows[e.RowIndex].Cells["Id"].Value;  // Assuming 'Id' is the Expense ID column
+                EditExpenseForm editExpenseForm = new EditExpenseForm(expenseId);
+                editExpenseForm.ShowDialog();  // Open Edit Expense form for editing
+            }
+
+            // Handle Delete button click in the DataGridView for Expenses
+            if (e.ColumnIndex == dgvExpenses.Columns["ActionDelete"].Index && e.RowIndex >= 0)
+            {
+                int expenseId = (int)dgvExpenses.Rows[e.RowIndex].Cells["Id"].Value;
+                var confirmResult = MessageBox.Show("Are you sure to delete this expense?",
+                                     "Confirm Delete",
+                                     MessageBoxButtons.YesNo);
+                if (confirmResult == DialogResult.Yes)
+                {
+                    using (var context = new ExpenseContext())
+                    {
+                        var expenseRepository = new ExpenseRepository(context);
+                        bool success = expenseRepository.DeleteExpense(expenseId);
+
+                        if (success)
+                        {
+                            MessageBox.Show("Expense deleted successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            LoadDashboardData(); // Refresh the data after deleting
+                        }
+                        else
+                        {
+                            MessageBox.Show("Failed to delete expense.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
                 }
