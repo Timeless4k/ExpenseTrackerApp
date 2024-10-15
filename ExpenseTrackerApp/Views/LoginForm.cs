@@ -2,6 +2,9 @@
 using System.Windows.Forms;
 using ExpenseTrackerApp.Controllers;
 using ExpenseTrackerApp.Data;
+using ExpenseTrackerApp.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Configuration;
 
 namespace ExpenseTrackerApp.Views
 {
@@ -12,7 +15,6 @@ namespace ExpenseTrackerApp.Views
             InitializeComponent();
         }
 
-        // Event handler for the Login button click
         private void BtnLogin_Click(object sender, EventArgs e)
         {
             string email = txtEmail.Text;
@@ -24,7 +26,11 @@ namespace ExpenseTrackerApp.Views
                 return;
             }
 
-            using (var context = new ExpenseContext())
+            var options = new DbContextOptionsBuilder<ExpenseContext>()
+                .UseMySQL(ConfigurationManager.ConnectionStrings["ExpenseTrackerDB"].ConnectionString)
+                .Options;
+
+            using (var context = new ExpenseContext(options))
             {
                 var userRepository = new UserRepository(context);
                 var user = userRepository.GetUserByEmailAndPassword(email, password);
@@ -35,7 +41,6 @@ namespace ExpenseTrackerApp.Views
                     lblMessage.Text = "Login successful!";
                     SessionManager.SetCurrentUser(user);
 
-                    // Redirect to the DashboardForm after successful login
                     DashboardForm dashboardForm = new DashboardForm();
                     dashboardForm.Show();
                     this.Hide();
@@ -48,7 +53,6 @@ namespace ExpenseTrackerApp.Views
             }
         }
 
-        // Event handler for switching to the sign-up form
         private void BtnSwitchToSignUp_Click(object sender, EventArgs e)
         {
             SignUpForm signUpForm = new SignUpForm();

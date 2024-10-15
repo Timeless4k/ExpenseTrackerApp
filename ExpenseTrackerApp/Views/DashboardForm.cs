@@ -1,17 +1,28 @@
 ﻿using System;
+using System.Linq;
 using System.Windows.Forms;
 using ExpenseTrackerApp.Controllers;
 using ExpenseTrackerApp.Data;
+using ExpenseTrackerApp.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Configuration;
 
 namespace ExpenseTrackerApp.Views
 {
     public partial class DashboardForm : Form
     {
         private System.Windows.Forms.Timer _refreshTimer = new System.Windows.Forms.Timer();
+        private readonly DbContextOptions<ExpenseContext> _options;
 
         public DashboardForm()
         {
             InitializeComponent();
+
+            // Create the DbContextOptions for ExpenseContext once, at class level
+            _options = new DbContextOptionsBuilder<ExpenseContext>()
+                .UseMySQL(ConfigurationManager.ConnectionStrings["ExpenseTrackerDB"].ConnectionString)
+                .Options;
+
             StartAutoRefresh();
             LoadDashboardData();
         }
@@ -42,7 +53,7 @@ namespace ExpenseTrackerApp.Views
                 return;
             }
 
-            using (var context = new ExpenseContext())
+            using (var context = new ExpenseContext(_options))
             {
                 var budgetRepository = new BudgetRepository(context);
                 var expenseRepository = new ExpenseRepository(context);
@@ -169,22 +180,19 @@ namespace ExpenseTrackerApp.Views
             LoginForm loginForm = new LoginForm();
             loginForm.Show();
         }
+
         // Handle DataGridView Expenses CellContentClick for editing and deleting
         private void dgvExpenses_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             // Handle Edit button click in the DataGridView for Expenses
             if (e.ColumnIndex == dgvExpenses.Columns["ActionEdit"].Index && e.RowIndex >= 0)
             {
-                // Assuming 'Id' is the Expense ID column
                 int expenseId = (int)dgvExpenses.Rows[e.RowIndex].Cells["Id"].Value;
 
-                // Safely create a new instance of the EditExpenseForm
                 using (EditExpenseForm editExpenseForm = new EditExpenseForm(expenseId))
                 {
-                    // Open the form modally
                     DialogResult dialogResult = editExpenseForm.ShowDialog();
 
-                    // If the form was closed with a positive result, refresh the dashboard
                     if (dialogResult == DialogResult.OK)
                     {
                         LoadDashboardData();  // Refresh the dashboard data after the edit
@@ -197,13 +205,11 @@ namespace ExpenseTrackerApp.Views
             {
                 int expenseId = (int)dgvExpenses.Rows[e.RowIndex].Cells["Id"].Value;
 
-                var confirmResult = MessageBox.Show("Are you sure to delete this expense?",
-                                                     "Confirm Delete",
-                                                     MessageBoxButtons.YesNo);
+                var confirmResult = MessageBox.Show("Are you sure to delete this expense?", "Confirm Delete", MessageBoxButtons.YesNo);
 
                 if (confirmResult == DialogResult.Yes)
                 {
-                    using (var context = new ExpenseContext())
+                    using (var context = new ExpenseContext(_options))
                     {
                         var expenseRepository = new ExpenseRepository(context);
                         bool success = expenseRepository.Delete(expenseId);
@@ -228,9 +234,9 @@ namespace ExpenseTrackerApp.Views
             // Handle Edit button click in the DataGridView for Income
             if (e.ColumnIndex == dgvIncome.Columns["ActionEdit"].Index && e.RowIndex >= 0)
             {
-                int incomeId = (int)dgvIncome.Rows[e.RowIndex].Cells["Id"].Value;  // Assuming 'Id' is the Income ID column
+                int incomeId = (int)dgvIncome.Rows[e.RowIndex].Cells["Id"].Value;
                 EditIncomeForm editIncomeForm = new EditIncomeForm(incomeId);
-                editIncomeForm.ShowDialog();  // Open Edit Income form for editing
+                editIncomeForm.ShowDialog();
             }
 
             // Handle Delete button click in the DataGridView for Income
@@ -240,7 +246,7 @@ namespace ExpenseTrackerApp.Views
                 var confirmResult = MessageBox.Show("Are you sure to delete this income?", "Confirm Delete", MessageBoxButtons.YesNo);
                 if (confirmResult == DialogResult.Yes)
                 {
-                    using (var context = new ExpenseContext())
+                    using (var context = new ExpenseContext(_options))
                     {
                         var incomeRepository = new IncomeRepository(context);
                         bool success = incomeRepository.Delete(incomeId);

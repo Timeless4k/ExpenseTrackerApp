@@ -1,28 +1,37 @@
-﻿// Views/EditIncomeForm.cs
-using System;
+﻿using System;
 using System.Windows.Forms;
 using ExpenseTrackerApp.Models;
 using ExpenseTrackerApp.Data;
+using Microsoft.EntityFrameworkCore;
+using System.Configuration;
 
 namespace ExpenseTrackerApp.Views
 {
     public partial class EditIncomeForm : Form
     {
-        private readonly int _incomeId;  // Income ID to load the details
-        private readonly IncomeRepository _incomeRepository; // Set as readonly and initialized directly
+        private readonly int _incomeId;
+        private readonly ExpenseContext _context;
+        private readonly IncomeRepository _incomeRepository;
 
         public EditIncomeForm(int incomeId)
         {
             InitializeComponent();
             _incomeId = incomeId;
-            _incomeRepository = new IncomeRepository(new ExpenseContext()); // Ensure it's initialized
+
+            // Properly initialize DbContext with options
+            var options = new DbContextOptionsBuilder<ExpenseContext>()
+                .UseMySQL(ConfigurationManager.ConnectionStrings["ExpenseTrackerDB"].ConnectionString)
+                .Options;
+
+            _context = new ExpenseContext(options); // Create a single context instance
+            _incomeRepository = new IncomeRepository(_context);
             LoadIncomeDetails();
         }
 
-        // Load income details based on income ID
         private void LoadIncomeDetails()
         {
-            var income = _incomeRepository.GetById(_incomeId); // Fixed method name
+            // Fetch the income from the database
+            var income = _incomeRepository.GetById(_incomeId);
             if (income != null)
             {
                 txtIncomeSource.Text = income.Source;
@@ -36,36 +45,40 @@ namespace ExpenseTrackerApp.Views
             }
         }
 
-        // Save the updated income details
         private void btnSave_Click(object sender, EventArgs e)
         {
-            // Validate the income source
             if (string.IsNullOrWhiteSpace(txtIncomeSource.Text))
             {
                 MessageBox.Show("Please enter a valid income source.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            // Validate the amount
             if (decimal.TryParse(txtIncomeAmount.Text, out decimal amount) && amount > 0)
             {
-                var updatedIncome = new Income
-                {
-                    Id = _incomeId,
-                    Source = txtIncomeSource.Text,
-                    Amount = amount,
-                    Date = dtpIncomeDate.Value
-                };
-
                 try
                 {
-                    bool result = _incomeRepository.Update(updatedIncome); // Fixed method name
+                    // Attach the existing entity to the context
+                    var existingIncome = _incomeRepository.GetById(_incomeId);
+                    if (existingIncome == null)
+                    {
+                        MessageBox.Show("Income not found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    // Update the income properties
+                    existingIncome.Source = txtIncomeSource.Text;
+                    existingIncome.Amount = amount;
+                    existingIncome.Date = dtpIncomeDate.Value;
+
+                    // Mark the entity as modified
+                    _context.Entry(existingIncome).State = EntityState.Modified;
+                    bool result = _context.SaveChanges() > 0;
 
                     if (result)
                     {
                         MessageBox.Show("Income updated successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        this.DialogResult = DialogResult.OK;  // Set result to OK for external handling
-                        this.Close();  // Close the form after saving
+                        this.DialogResult = DialogResult.OK;
+                        this.Close();
                     }
                     else
                     {
@@ -85,8 +98,18 @@ namespace ExpenseTrackerApp.Views
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.Cancel;  // Set result to Cancel for external handling
-            this.Close();  // Close the form without saving
+            this.DialogResult = DialogResult.Cancel;
+            this.Close();
+        }
+
+        // Clean up resources on form close
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (_context != null))
+            {
+                _context.Dispose(); // Dispose of the context when form is disposed
+            }
+            base.Dispose(disposing);
         }
     }
 }

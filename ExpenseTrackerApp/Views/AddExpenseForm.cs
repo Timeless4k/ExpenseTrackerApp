@@ -2,6 +2,8 @@
 using ExpenseTrackerApp.Controllers;
 using ExpenseTrackerApp.Data;
 using ExpenseTrackerApp.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Configuration;
 using System.Windows.Forms;
 
 namespace ExpenseTrackerApp.Views
@@ -15,28 +17,30 @@ namespace ExpenseTrackerApp.Views
         {
             InitializeComponent();
             _userId = userId;
-            _expenseController = new ExpenseController(new ExpenseRepository(new ExpenseContext()));
+
+            var options = new DbContextOptionsBuilder<ExpenseContext>()
+                .UseMySQL(ConfigurationManager.ConnectionStrings["ExpenseTrackerDB"].ConnectionString)
+                .Options;
+
+            _expenseController = new ExpenseController(new ExpenseRepository(new ExpenseContext(options)));
             CustomizeUI();
         }
 
-        // Button click event handler to add expense
         private void BtnAddExpense_Click(object sender, EventArgs e)
         {
             try
             {
-                // Get user inputs
                 string name = txtExpenseName.Text.Trim();
                 decimal amount = decimal.Parse(txtExpenseAmount.Text.Trim());
                 string category = txtExpenseCategory.Text.Trim();
                 DateTime date = dtpExpenseDate.Value;
 
-                // Call the ExpenseController to add the expense
                 bool success = _expenseController.AddExpense(_userId, name, amount, category, date);
 
                 if (success)
                 {
                     MessageBox.Show("Expense added successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    ClearFields(); // Reset fields after successful submission
+                    ClearFields();
                 }
                 else
                 {
@@ -53,28 +57,22 @@ namespace ExpenseTrackerApp.Views
             }
         }
 
-        // Clears all fields in the form
         private void ClearFields()
         {
             txtExpenseName.Clear();
             txtExpenseAmount.Clear();
             txtExpenseCategory.Clear();
-            dtpExpenseDate.Value = DateTime.Now; // Reset date picker to current date
+            dtpExpenseDate.Value = DateTime.Now;
         }
 
-        // Button click event handler to close the form
         private void BtnCancel_Click(object sender, EventArgs e)
         {
-            this.Close(); // Close the form when user cancels
+            this.Close();
         }
 
-        // Customize UI to make it more modern
         private void CustomizeUI()
         {
-            // Set background color
             this.BackColor = System.Drawing.Color.White;
-
-            // Customize buttons
             btnAddExpense.FlatStyle = FlatStyle.Flat;
             btnAddExpense.BackColor = System.Drawing.Color.SteelBlue;
             btnAddExpense.ForeColor = System.Drawing.Color.White;
@@ -87,7 +85,6 @@ namespace ExpenseTrackerApp.Views
             btnCancel.FlatAppearance.BorderSize = 0;
             btnCancel.Font = new Font("Segoe UI", 10);
 
-            // Set label and input font
             foreach (Control control in this.Controls)
             {
                 if (control is Label)

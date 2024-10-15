@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35122.118
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseTrackerApp", "ExpenseTrackerApp\ExpenseTrackerApp.csproj", "{BA1ED4C7-41B0-4CF1-BBEF-04E2F19DE2AE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExpenseTrackerApp", "ExpenseTrackerApp\ExpenseTrackerApp.csproj", "{BA1ED4C7-41B0-4CF1-BBEF-04E2F19DE2AE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

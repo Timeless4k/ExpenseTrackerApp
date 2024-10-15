@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Windows.Forms;
-using ExpenseTrackerApp.Controllers; // Assuming UserRepository is in Controllers
+using ExpenseTrackerApp.Controllers;
 using ExpenseTrackerApp.Data;
+using Microsoft.EntityFrameworkCore;
+using System.Configuration;
 
 namespace ExpenseTrackerApp.Views
 {
@@ -12,7 +14,6 @@ namespace ExpenseTrackerApp.Views
             InitializeComponent();
         }
 
-        // Event handler for the Sign Up button click
         private void BtnSignUp_Click(object sender, EventArgs e)
         {
             string firstName = txtFirstName.Text;
@@ -26,7 +27,11 @@ namespace ExpenseTrackerApp.Views
                 return;
             }
 
-            using (var context = new ExpenseContext())
+            var options = new DbContextOptionsBuilder<ExpenseContext>()
+                .UseMySQL(ConfigurationManager.ConnectionStrings["ExpenseTrackerDB"].ConnectionString)
+                .Options;
+
+            using (var context = new ExpenseContext(options))
             {
                 var userRepository = new UserRepository(context);
 
@@ -41,7 +46,7 @@ namespace ExpenseTrackerApp.Views
                     // Redirect to LoginForm after successful registration
                     LoginForm loginForm = new LoginForm();
                     loginForm.Show();
-                    this.Hide(); // Hide the sign-up form after registration
+                    this.Hide();
                 }
                 else
                 {
@@ -51,7 +56,6 @@ namespace ExpenseTrackerApp.Views
             }
         }
 
-        // Clear input fields after success
         private void ClearFields()
         {
             txtFirstName.Clear();
@@ -60,7 +64,6 @@ namespace ExpenseTrackerApp.Views
             txtPassword.Clear();
         }
 
-        // Event handler for switching back to login form
         private void BtnSwitchToLogin_Click(object sender, EventArgs e)
         {
             LoginForm loginForm = new LoginForm();

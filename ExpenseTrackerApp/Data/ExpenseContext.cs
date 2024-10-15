@@ -8,16 +8,13 @@ namespace ExpenseTrackerApp.Data
 {
     public class ExpenseContext : DbContext
     {
+        // Constructor that takes DbContextOptions to allow flexibility for tests and production
+        public ExpenseContext(DbContextOptions<ExpenseContext> options) : base(options) { }
+
         public DbSet<User> Users { get; set; }
         public DbSet<Budget> Budgets { get; set; }
         public DbSet<Expense> Expenses { get; set; }
         public DbSet<Income> Income { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            var connectionString = ConfigurationManager.ConnectionStrings["ExpenseTrackerDB"].ConnectionString;
-            optionsBuilder.UseMySQL(connectionString);
-        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -34,7 +31,7 @@ namespace ExpenseTrackerApp.Data
                 .HasForeignKey(b => b.UserId);
 
             modelBuilder.Entity<User>()
-                .HasMany(u => u.Income)  
+                .HasMany(u => u.Income)
                 .WithOne()
                 .HasForeignKey(i => i.UserId);
         }

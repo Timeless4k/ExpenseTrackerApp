@@ -3,6 +3,8 @@ using System.Windows.Forms;
 using ExpenseTrackerApp.Controllers;
 using ExpenseTrackerApp.Data;
 using ExpenseTrackerApp.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Configuration;
 
 namespace ExpenseTrackerApp.Views
 {
@@ -15,41 +17,41 @@ namespace ExpenseTrackerApp.Views
         {
             InitializeComponent();
             _expenseId = expenseId;
-            _expenseController = new ExpenseController(new ExpenseRepository(new ExpenseContext()));
+
+            // DbContextOptions to be used for connecting to the ExpenseContext
+            var options = new DbContextOptionsBuilder<ExpenseContext>()
+                .UseMySQL(ConfigurationManager.ConnectionStrings["ExpenseTrackerDB"].ConnectionString)
+                .Options;
+
+            _expenseController = new ExpenseController(new ExpenseRepository(new ExpenseContext(options)));
             LoadExpenseDetails();
         }
 
-        // Load the existing expense details to populate the form fields
+        // Load the expense details using the expenseId and populate the form fields
         private void LoadExpenseDetails()
         {
-            using (var context = new ExpenseContext())
+            var expense = _expenseController.GetExpenseById(_expenseId);
+
+            if (expense != null)
             {
-                var expenseRepository = new ExpenseRepository(context);
-
-                // Fetching expense by ID (this assumes you have GetById method in ExpenseRepository)
-                var expense = expenseRepository.GetById(_expenseId);
-
-                if (expense != null)
-                {
-                    txtExpenseName.Text = expense.Name;
-                    txtExpenseAmount.Text = expense.Amount.ToString();
-                    txtExpenseCategory.Text = expense.Category;
-                    dtpExpenseDate.Value = expense.Date;
-                }
-                else
-                {
-                    MessageBox.Show("Expense not found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    this.Close();  // Close the form if the expense isn't found
-                }
+                txtExpenseName.Text = expense.Name;
+                txtExpenseAmount.Text = expense.Amount.ToString();
+                txtExpenseCategory.Text = expense.Category;
+                dtpExpenseDate.Value = expense.Date;
+            }
+            else
+            {
+                MessageBox.Show("Expense not found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Close();
             }
         }
 
-        // Save button click event to update the expense
+        // Save button click event to update the expense details
         private void BtnSave_Click(object sender, EventArgs e)
         {
             try
             {
-                // Get updated user inputs
+                // Get user input values from the form fields
                 string name = txtExpenseName.Text.Trim();
                 decimal amount = decimal.Parse(txtExpenseAmount.Text.Trim());
                 string category = txtExpenseCategory.Text.Trim();
@@ -61,7 +63,7 @@ namespace ExpenseTrackerApp.Views
                 if (success)
                 {
                     MessageBox.Show("Expense updated successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    this.Close();  // Close the form after successful update
+                    this.Close(); // Close the form after successful update
                 }
                 else
                 {
@@ -78,7 +80,7 @@ namespace ExpenseTrackerApp.Views
             }
         }
 
-        // Cancel button click event to close the form without saving
+        // Cancel button to close the form without saving
         private void BtnCancel_Click(object sender, EventArgs e)
         {
             this.Close();

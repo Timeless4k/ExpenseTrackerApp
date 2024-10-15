@@ -1,6 +1,6 @@
 using System;
 using System.Windows.Forms;
-using ExpenseTrackerApp.Views;  // Make sure to reference Views where WelcomeForm is located
+using ExpenseTrackerApp.Views;  // Ensure this references where WelcomeForm is located
 
 namespace ExpenseTrackerApp
 {
@@ -17,7 +17,6 @@ namespace ExpenseTrackerApp
             ApplicationConfiguration.Initialize();
 
             // Start with WelcomeForm as the initial form
-            
             Application.Run(new WelcomeForm());
         }
     }

@@ -3,6 +3,8 @@ using System;
 using ExpenseTrackerApp.Controllers;
 using ExpenseTrackerApp.Data;
 using ExpenseTrackerApp.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Configuration;
 
 namespace ExpenseTrackerApp.Views
 {
@@ -15,7 +17,13 @@ namespace ExpenseTrackerApp.Views
         {
             InitializeComponent();
             _userId = userId;
-            _incomeController = new IncomeController(new IncomeRepository(new ExpenseContext()));
+
+            // Create the DbContextOptions for ExpenseContext
+            var options = new DbContextOptionsBuilder<ExpenseContext>()
+                .UseMySQL(ConfigurationManager.ConnectionStrings["ExpenseTrackerDB"].ConnectionString)
+                .Options;
+
+            _incomeController = new IncomeController(new IncomeRepository(new ExpenseContext(options)));
             CustomizeUI();
         }
 
