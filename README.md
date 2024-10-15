@@ -37,38 +37,6 @@ The **Expense Tracker Application** is a personal finance management tool design
 
 ---
 
-## Structure
-.
-├── Controllers
-│   ├── ExpenseController.cs
-│   ├── IncomeController.cs
-│   └── SessionManager.cs
-├── Data
-│   ├── ExpenseContext.cs
-│   ├── ExpenseRepository.cs
-│   ├── IncomeRepository.cs
-│   ├── IExpenseRepository.cs
-│   ├── IIncomeRepository.cs
-│   ├── IRepository.cs
-│   └── UserRepository.cs
-├── Models
-│   ├── Expense.cs
-│   ├── Income.cs
-│   ├── Transaction.cs
-│   └── User.cs
-├── Views
-│   ├── AddExpenseForm.cs
-│   ├── AddIncomeForm.cs
-│   ├── DashboardForm.cs
-│   ├── EditExpenseForm.cs
-│   ├── EditIncomeForm.cs
-│   ├── LoginForm.cs
-│   └── SignUpForm.cs
-└── Program.cs
-
-
----
-
 ## Setup Instructions
 
 1. **Database Setup**:
