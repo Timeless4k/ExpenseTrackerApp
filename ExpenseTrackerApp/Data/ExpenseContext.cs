@@ -1,7 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;                      // For Entity Framework Core
-using Microsoft.Extensions.Configuration;                // For configuration handling
-using ExpenseTrackerApp.Models;                          // For referencing your models
-using System.Configuration;                              // For accessing the App.config connection string
+﻿// Data/ExpenseContext.cs
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using ExpenseTrackerApp.Models;
+using System.Configuration;
 
 namespace ExpenseTrackerApp.Data
 {
@@ -10,14 +11,11 @@ namespace ExpenseTrackerApp.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Budget> Budgets { get; set; }
         public DbSet<Expense> Expenses { get; set; }
-        public DbSet<Income> Income { get; set; }  
+        public DbSet<Income> Income { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            // Fetch connection string from App.config
             var connectionString = ConfigurationManager.ConnectionStrings["ExpenseTrackerDB"].ConnectionString;
-
-            // Use MySQL from the new package for Entity Framework Core
             optionsBuilder.UseMySQL(connectionString);
         }
 
@@ -25,20 +23,19 @@ namespace ExpenseTrackerApp.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Define relationships between User, Expense, Budget, and Income models
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Expenses)
-                .WithOne(e => e.User)
+                .WithOne()
                 .HasForeignKey(e => e.UserId);
 
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Budgets)
-                .WithOne(b => b.User)
+                .WithOne()
                 .HasForeignKey(b => b.UserId);
 
             modelBuilder.Entity<User>()
-                .HasMany(u => u.Incomes)
-                .WithOne(i => i.User)
+                .HasMany(u => u.Income)  
+                .WithOne()
                 .HasForeignKey(i => i.UserId);
         }
     }

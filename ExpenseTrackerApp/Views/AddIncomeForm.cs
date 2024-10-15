@@ -1,4 +1,5 @@
-﻿using System;
+﻿// Views/AddIncomeForm.cs
+using System;
 using ExpenseTrackerApp.Controllers;
 using ExpenseTrackerApp.Data;
 using ExpenseTrackerApp.Models;
@@ -14,7 +15,7 @@ namespace ExpenseTrackerApp.Views
         {
             InitializeComponent();
             _userId = userId;
-            _incomeController = new IncomeController(new ExpenseContext());
+            _incomeController = new IncomeController(new IncomeRepository(new ExpenseContext()));
             CustomizeUI();
         }
 

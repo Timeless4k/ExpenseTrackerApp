@@ -1,20 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// Models/Expense.cs
+using System;
 
 namespace ExpenseTrackerApp.Models
 {
-    public class Expense
+    public class Expense : Transaction
     {
-        public int Id { get; set; }               // Primary key
-        public string Name { get; set; }          // Name of the expense
-        public decimal Amount { get; set; }       // Expense amount
-        public string Category { get; set; }      // Expense category (e.g., Food, Transport)
-        public DateTime Date { get; set; }        // Date of the expense
-        public int? UserId { get; set; }          // Foreign key to the User table
-        public User User { get; set; }            // Navigation property (Optional)
+        public string Name { get; set; } = string.Empty; // Non-nullable, initialized to an empty string
+        public string Category { get; set; } = string.Empty; // Non-nullable, initialized to an empty string
     }
 }
-

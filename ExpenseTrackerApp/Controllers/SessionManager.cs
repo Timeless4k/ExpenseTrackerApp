@@ -5,8 +5,8 @@ namespace ExpenseTrackerApp.Controllers
 {
     public static class SessionManager
     {
-        // A property to hold the currently logged-in user
-        private static User _currentUser;
+        // Declare _currentUser as nullable to allow null assignments
+        private static User? _currentUser;  // Make it nullable by adding '?'
 
         // Getter for the current user
         public static User CurrentUser

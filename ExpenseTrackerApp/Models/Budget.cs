@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// Models/Budget.cs
+using System;
 
 namespace ExpenseTrackerApp.Models
 {
     public class Budget
     {
-        public int Id { get; set; }                    // Primary key
-        public decimal TotalBudget { get; set; }       // Total budget amount
-        public decimal RemainingBudget { get; set; }   // Remaining budget amount
-        public int UserId { get; set; }                // Foreign key to the User table
-        public User User { get; set; }                 // Navigation property (Optional)
+        public int Id { get; set; }
+        public decimal TotalBudget { get; set; }  // Add this property
+        public decimal RemainingBudget { get; set; }  // Add this property
+        public string Name { get; set; } = string.Empty;  // Non-nullable, initialized
+        public int UserId { get; set; }
     }
 }
-

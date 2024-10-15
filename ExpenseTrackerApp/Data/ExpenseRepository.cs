@@ -1,64 +1,52 @@
-﻿using System;
+﻿// Data/ExpenseRepository.cs
 using System.Collections.Generic;
 using System.Linq;
-using ExpenseTrackerApp.Data;
 using ExpenseTrackerApp.Models;
 
 namespace ExpenseTrackerApp.Data
 {
-    public class ExpenseRepository
+    public class ExpenseRepository : IExpenseRepository
     {
         private readonly ExpenseContext _context;
 
-        public ExpenseRepository(ExpenseContext context)
-        {
-            _context = context;
-        }
+        // Use expression-bodied constructor
+        public ExpenseRepository(ExpenseContext context) => _context = context;
 
-        // Method to add a new expense for a user
-        public void AddExpense(Expense expense)
+        public Expense? GetById(int id) => _context.Expenses.Find(id);
+
+        public List<Expense> GetAll() => _context.Expenses.ToList();
+
+        public bool Add(Expense expense)
         {
             _context.Expenses.Add(expense);
-            _context.SaveChanges();
+            return _context.SaveChanges() > 0;
         }
 
-        // Method to get recent expenses by user ID (limit to last 10 expenses, for example)
+        public bool Update(Expense expense)
+        {
+            _context.Expenses.Update(expense);
+            return _context.SaveChanges() > 0;
+        }
+
+        public bool Delete(int id)
+        {
+            var expense = GetById(id);
+            if (expense == null) return false;
+            _context.Expenses.Remove(expense);
+            return _context.SaveChanges() > 0;
+        }
+
         public List<Expense> GetRecentExpensesByUserId(int userId)
         {
+            return _context.Expenses.Where(e => e.UserId == userId).ToList();
+        }
+
+        // Additional methods like getting expenses by specific criteria
+        public List<Expense> GetExpensesByDateRange(int userId, DateTime startDate, DateTime endDate)
+        {
             return _context.Expenses
-                           .Where(e => e.UserId == userId)
-                           .OrderByDescending(e => e.Date)
-                           .Take(10)  // Limit to the 10 most recent expenses
-                           .ToList();
-        }
-
-        // Method to delete an expense by its ID
-        public bool DeleteExpense(int expenseId)
-        {
-            var expense = _context.Expenses.SingleOrDefault(e => e.Id == expenseId);
-            if (expense != null)
-            {
-                _context.Expenses.Remove(expense);
-                _context.SaveChanges();
-                return true;
-            }
-            return false;
-        }
-
-        // Method to update an existing expense
-        public bool UpdateExpense(Expense updatedExpense)
-        {
-            var existingExpense = _context.Expenses.SingleOrDefault(e => e.Id == updatedExpense.Id);
-            if (existingExpense != null)
-            {
-                existingExpense.Name = updatedExpense.Name;
-                existingExpense.Amount = updatedExpense.Amount;
-                existingExpense.Category = updatedExpense.Category;
-                existingExpense.Date = updatedExpense.Date;
-                _context.SaveChanges();
-                return true;
-            }
-            return false;
+                .Where(e => e.UserId == userId && e.Date >= startDate && e.Date <= endDate)
+                .ToList();
         }
     }
 }

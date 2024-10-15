@@ -1,4 +1,5 @@
-﻿using System;
+﻿// Data/BudgetRepository.cs
+using System;
 using System.Linq;
 using ExpenseTrackerApp.Data;
 using ExpenseTrackerApp.Models;
@@ -9,10 +10,8 @@ namespace ExpenseTrackerApp.Data
     {
         private readonly ExpenseContext _context;
 
-        public BudgetRepository(ExpenseContext context)
-        {
-            _context = context;
-        }
+        // Use expression-bodied constructor
+        public BudgetRepository(ExpenseContext context) => _context = context;
 
         // Method to add or update a user's budget
         public void AddOrUpdateBudget(Budget budget)
@@ -32,7 +31,7 @@ namespace ExpenseTrackerApp.Data
         }
 
         // Method to get the budget for a user by user ID
-        public Budget GetBudgetByUserId(int userId)
+        public Budget? GetBudgetByUserId(int userId)
         {
             return _context.Budgets.SingleOrDefault(b => b.UserId == userId);
         }

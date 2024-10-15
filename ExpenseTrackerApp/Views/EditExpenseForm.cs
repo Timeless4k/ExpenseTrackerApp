@@ -25,7 +25,9 @@ namespace ExpenseTrackerApp.Views
             using (var context = new ExpenseContext())
             {
                 var expenseRepository = new ExpenseRepository(context);
-                var expense = expenseRepository.GetRecentExpensesByUserId(_expenseId).FirstOrDefault();  // Assuming that the method will fetch by ID
+
+                // Fetching expense by ID (this assumes you have GetById method in ExpenseRepository)
+                var expense = expenseRepository.GetById(_expenseId);
 
                 if (expense != null)
                 {

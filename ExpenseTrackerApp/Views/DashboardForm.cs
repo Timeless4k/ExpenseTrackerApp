@@ -7,7 +7,7 @@ namespace ExpenseTrackerApp.Views
 {
     public partial class DashboardForm : Form
     {
-        private System.Windows.Forms.Timer _refreshTimer;
+        private System.Windows.Forms.Timer _refreshTimer = new System.Windows.Forms.Timer();
 
         public DashboardForm()
         {
@@ -19,14 +19,13 @@ namespace ExpenseTrackerApp.Views
         // Initialize and start the auto-refresh timer
         private void StartAutoRefresh()
         {
-            _refreshTimer = new System.Windows.Forms.Timer();
             _refreshTimer.Interval = 1000;  // Set interval to 1 second (1000 ms)
             _refreshTimer.Tick += new EventHandler(RefreshTimer_Tick);
             _refreshTimer.Start();
         }
 
         // Timer Tick event handler that triggers data reload every second
-        private void RefreshTimer_Tick(object sender, EventArgs e)
+        private void RefreshTimer_Tick(object? sender, EventArgs e)
         {
             LoadDashboardData();
         }
@@ -146,21 +145,15 @@ namespace ExpenseTrackerApp.Views
             }
         }
 
-        // Event handler for AddExpense button click
+        // Handle the AddExpense button click
         private void btnAddExpense_Click(object sender, EventArgs e)
         {
-            // Fetch the current userId from SessionManager and pass it to AddExpenseForm
             var userId = SessionManager.CurrentUser.Id;
             AddExpenseForm addExpenseForm = new AddExpenseForm(userId);
             addExpenseForm.Show();
         }
 
-        private void btnManageBudgets_Click(object sender, EventArgs e)
-        {
-            ManageBudgetsForm manageBudgetsForm = new ManageBudgetsForm();
-            manageBudgetsForm.Show();
-        }
-
+        // Handle the AddIncome button click
         private void btnAddIncome_Click(object sender, EventArgs e)
         {
             var userId = SessionManager.CurrentUser.Id;
@@ -168,67 +161,52 @@ namespace ExpenseTrackerApp.Views
             addIncomeForm.Show();
         }
 
-        private void dgvIncome_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        // Handle the Logout button click
+        private void btnLogout_Click(object sender, EventArgs e)
         {
-            // Handle Edit button click in the DataGridView for Income
-            if (e.ColumnIndex == dgvIncome.Columns["ActionEdit"].Index && e.RowIndex >= 0)
-            {
-                int incomeId = (int)dgvIncome.Rows[e.RowIndex].Cells["Id"].Value;  // Assuming 'Id' is the Income ID column
-                EditIncomeForm editIncomeForm = new EditIncomeForm(incomeId);
-                editIncomeForm.ShowDialog();  // Open Edit Income form for editing
-            }
-
-            // Handle Delete button click in the DataGridView for Income
-            if (e.ColumnIndex == dgvIncome.Columns["ActionDelete"].Index && e.RowIndex >= 0)
-            {
-                int incomeId = (int)dgvIncome.Rows[e.RowIndex].Cells["Id"].Value;
-                var confirmResult = MessageBox.Show("Are you sure to delete this income?",
-                                     "Confirm Delete",
-                                     MessageBoxButtons.YesNo);
-                if (confirmResult == DialogResult.Yes)
-                {
-                    using (var context = new ExpenseContext())
-                    {
-                        var incomeRepository = new IncomeRepository(context);
-                        bool success = incomeRepository.DeleteIncome(incomeId);
-
-                        if (success)
-                        {
-                            MessageBox.Show("Income deleted successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            LoadDashboardData(); // Refresh the data after deleting
-                        }
-                        else
-                        {
-                            MessageBox.Show("Failed to delete income.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                    }
-                }
-            }
+            SessionManager.Logout();
+            this.Hide();
+            LoginForm loginForm = new LoginForm();
+            loginForm.Show();
         }
-
+        // Handle DataGridView Expenses CellContentClick for editing and deleting
         private void dgvExpenses_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             // Handle Edit button click in the DataGridView for Expenses
             if (e.ColumnIndex == dgvExpenses.Columns["ActionEdit"].Index && e.RowIndex >= 0)
             {
-                int expenseId = (int)dgvExpenses.Rows[e.RowIndex].Cells["Id"].Value;  // Assuming 'Id' is the Expense ID column
-                EditExpenseForm editExpenseForm = new EditExpenseForm(expenseId);
-                editExpenseForm.ShowDialog();  // Open Edit Expense form for editing
+                // Assuming 'Id' is the Expense ID column
+                int expenseId = (int)dgvExpenses.Rows[e.RowIndex].Cells["Id"].Value;
+
+                // Safely create a new instance of the EditExpenseForm
+                using (EditExpenseForm editExpenseForm = new EditExpenseForm(expenseId))
+                {
+                    // Open the form modally
+                    DialogResult dialogResult = editExpenseForm.ShowDialog();
+
+                    // If the form was closed with a positive result, refresh the dashboard
+                    if (dialogResult == DialogResult.OK)
+                    {
+                        LoadDashboardData();  // Refresh the dashboard data after the edit
+                    }
+                }
             }
 
             // Handle Delete button click in the DataGridView for Expenses
             if (e.ColumnIndex == dgvExpenses.Columns["ActionDelete"].Index && e.RowIndex >= 0)
             {
                 int expenseId = (int)dgvExpenses.Rows[e.RowIndex].Cells["Id"].Value;
+
                 var confirmResult = MessageBox.Show("Are you sure to delete this expense?",
-                                     "Confirm Delete",
-                                     MessageBoxButtons.YesNo);
+                                                     "Confirm Delete",
+                                                     MessageBoxButtons.YesNo);
+
                 if (confirmResult == DialogResult.Yes)
                 {
                     using (var context = new ExpenseContext())
                     {
                         var expenseRepository = new ExpenseRepository(context);
-                        bool success = expenseRepository.DeleteExpense(expenseId);
+                        bool success = expenseRepository.Delete(expenseId);
 
                         if (success)
                         {
@@ -244,12 +222,41 @@ namespace ExpenseTrackerApp.Views
             }
         }
 
-        private void btnLogout_Click(object sender, EventArgs e)
+        // Handle DataGridView Income CellContentClick for editing and deleting
+        private void dgvIncome_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            SessionManager.Logout();
-            this.Hide();
-            LoginForm loginForm = new LoginForm();
-            loginForm.Show();
+            // Handle Edit button click in the DataGridView for Income
+            if (e.ColumnIndex == dgvIncome.Columns["ActionEdit"].Index && e.RowIndex >= 0)
+            {
+                int incomeId = (int)dgvIncome.Rows[e.RowIndex].Cells["Id"].Value;  // Assuming 'Id' is the Income ID column
+                EditIncomeForm editIncomeForm = new EditIncomeForm(incomeId);
+                editIncomeForm.ShowDialog();  // Open Edit Income form for editing
+            }
+
+            // Handle Delete button click in the DataGridView for Income
+            if (e.ColumnIndex == dgvIncome.Columns["ActionDelete"].Index && e.RowIndex >= 0)
+            {
+                int incomeId = (int)dgvIncome.Rows[e.RowIndex].Cells["Id"].Value;
+                var confirmResult = MessageBox.Show("Are you sure to delete this income?", "Confirm Delete", MessageBoxButtons.YesNo);
+                if (confirmResult == DialogResult.Yes)
+                {
+                    using (var context = new ExpenseContext())
+                    {
+                        var incomeRepository = new IncomeRepository(context);
+                        bool success = incomeRepository.Delete(incomeId);
+
+                        if (success)
+                        {
+                            MessageBox.Show("Income deleted successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            LoadDashboardData(); // Refresh the data after deleting
+                        }
+                        else
+                        {
+                            MessageBox.Show("Failed to delete income.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                }
+            }
         }
     }
 }

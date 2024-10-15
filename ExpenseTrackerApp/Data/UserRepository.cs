@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿// Data/UserRepository.cs
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using ExpenseTrackerApp.Data;
@@ -44,7 +45,7 @@ namespace ExpenseTrackerApp.Data
         }
 
         // Method to validate user credentials (Login) using email and password
-        public User GetUserByEmailAndPassword(string email, string password)
+        public User? GetUserByEmailAndPassword(string email, string password)
         {
             // Fetch the user by email
             var user = _context.Users.SingleOrDefault(u => u.Email == email);
