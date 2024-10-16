@@ -1,4 +1,4 @@
-﻿// Data/IncomeRepository.cs
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using ExpenseTrackerApp.Models;
@@ -9,12 +9,21 @@ namespace ExpenseTrackerApp.Data
     {
         private readonly ExpenseContext _context;
 
-        // Use expression-bodied constructor
-        public IncomeRepository(ExpenseContext context) => _context = context;
+        // Constructor with context initialization
+        public IncomeRepository(ExpenseContext context)
+        {
+            _context = context;
+        }
 
-        public Income? GetById(int id) => _context.Income.Find(id);
+        public Income? GetById(int id)
+        {
+            return _context.Income.Find(id);
+        }
 
-        public List<Income> GetAll() => _context.Income.ToList();
+        public List<Income> GetAll()
+        {
+            return _context.Income.ToList();
+        }
 
         public bool Add(Income income)
         {
@@ -38,10 +47,9 @@ namespace ExpenseTrackerApp.Data
 
         public List<Income> GetRecentIncomesByUserId(int userId)
         {
-            return _context.Income.Where(i => i.UserId == userId).ToList();
+            return _context.Income.Where(i => i.UserId == userId).OrderByDescending(i => i.Date).Take(10).ToList();
         }
 
-        // Additional methods if needed, like getting income by specific criteria, etc.
         public List<Income> GetIncomesByDateRange(int userId, DateTime startDate, DateTime endDate)
         {
             return _context.Income

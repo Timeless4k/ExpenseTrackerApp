@@ -101,15 +101,5 @@ namespace ExpenseTrackerApp.Views
             this.DialogResult = DialogResult.Cancel;
             this.Close();
         }
-
-        // Clean up resources on form close
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (_context != null))
-            {
-                _context.Dispose(); // Dispose of the context when form is disposed
-            }
-            base.Dispose(disposing);
-        }
     }
 }
