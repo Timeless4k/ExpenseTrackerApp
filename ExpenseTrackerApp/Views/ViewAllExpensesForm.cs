@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic; // Needed for List<T>
 using System.Windows.Forms;
 using ExpenseTrackerApp.Data;
 using ExpenseTrackerApp.Models;
@@ -23,38 +25,52 @@ namespace ExpenseTrackerApp.Views
                 .UseMySQL(ConfigurationManager.ConnectionStrings["ExpenseTrackerDB"].ConnectionString)
                 .Options;
 
-            // Set the user name in the label
+            // Set user name in the label
             if (SessionManager.IsLoggedIn())
             {
-                lblUserName.Text = $"Hi, {SessionManager.CurrentUser.FirstName}!";  
+                lblUserName.Text = $"Hi, {SessionManager.CurrentUser.FirstName}!";
             }
             else
             {
                 lblUserName.Text = "Hi, Guest!";
             }
 
-            LoadExpenses(); // Load expenses data when the form loads
+            LoadExpenses(); // Load expenses data
         }
 
-        // Method to load expenses data
+        // Load all expenses into the DataGridView
         private void LoadExpenses()
         {
             using (var context = new ExpenseContext(_options))
             {
                 var expenseRepository = new ExpenseRepository(context);
-                var expenses = expenseRepository.GetById(_userId);
+
+                // Fetch all expenses for the user
+                var expenses = expenseRepository.GetRecentExpensesByUserId(_userId);
+
                 dgvAllExpenses.DataSource = expenses;
 
-                // Format date to show only the date
-                if (dgvAllExpenses.Columns["Date"] != null)
+                // Calculate the total expenses, handling potential null values
+                var totalAmount = expenses.Sum(e => e.Amount ?? 0);
+                lblTotalExpenses.Text = $"Total Expenses: ${totalAmount:F2}";
+
+                // Safely format the 'Date' column to display only the date
+                var dateColumn = dgvAllExpenses.Columns["Date"];
+                if (dateColumn != null && dateColumn.DefaultCellStyle != null)
                 {
-                    dgvAllExpenses.Columns["Date"].DefaultCellStyle.Format = "d"; // Displays only the date
+                    dateColumn.DefaultCellStyle.Format = "d";
+                }
+                else
+                {
+                    MessageBox.Show("Date column or DefaultCellStyle is missing.",
+                        "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
 
                 // Hide unnecessary columns
                 HideUnnecessaryColumns(dgvAllExpenses, "Id", "UserId");
             }
         }
+
 
         // Method to hide unnecessary columns in the DataGridView
         private void HideUnnecessaryColumns(DataGridView dataGridView, params string[] columnsToHide)
@@ -68,43 +84,63 @@ namespace ExpenseTrackerApp.Views
             }
         }
 
-        // Event handler for the Back to Dashboard button click
-        private void BtnBackToDashboard_Click(object sender, EventArgs e)
+        // Search expenses by criteria (name, category, or amount)
+        private void txtSearch_TextChanged(object sender, EventArgs e)
         {
-            var dashboardForm = new DashboardForm();
-            dashboardForm.Show();
-            this.Close(); // Close the current form and return to the Dashboard
+            using (var context = new ExpenseContext(_options))
+            {
+                var searchQuery = txtSearch.Text.ToLower();
+
+                var filteredExpenses = context.Expenses
+                    .Where(e => e.UserId == _userId &&
+                                (
+                                    (e.Name != null && e.Name.ToLower().Contains(searchQuery)) ||
+                                    (e.Category != null && e.Category.ToLower().Contains(searchQuery)) ||
+                                    (e.Amount.HasValue && e.Amount.Value.ToString().Contains(searchQuery))
+                                ))
+                    .ToList();
+
+                dgvAllExpenses.DataSource = filteredExpenses;
+            }
         }
 
-        // Event handler for the Dashboard button click
+        // Event handler for Dashboard button click
         private void btnDashboard_Click(object sender, EventArgs e)
         {
             var dashboardForm = new DashboardForm();
             dashboardForm.Show();
-            this.Close(); // Go back to the dashboard
+            this.Close();
         }
 
-        // Event handler for the View All Income button click
+        // Event handler for View All Income button click
         private void btnViewAllIncome_Click(object sender, EventArgs e)
         {
-            var viewAllIncomeForm = new ViewAllIncomeForm(_userId);
-            viewAllIncomeForm.Show();
-            this.Hide(); // Hide the current form instead of closing it
+            var incomeForm = new ViewAllIncomeForm(_userId);
+            incomeForm.Show();
+            this.Close();
         }
 
-        // Event handler for the Logout button click
+        // Event handler for Settings button click
+        private void btnSettings_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Settings are under development.");
+        }
+        // Event handler for Add Expense button click
+        private void btnAddExpense_Click(object sender, EventArgs e)
+        {
+            var addExpenseForm = new AddExpenseForm(_userId);
+            addExpenseForm.ShowDialog();
+            LoadExpenses(); // Refresh the expenses after adding
+        }
+
+
+        // Event handler for Logout button click
         private void btnLogout_Click(object sender, EventArgs e)
         {
             SessionManager.Logout();
             var loginForm = new LoginForm();
             loginForm.Show();
-            this.Close(); // Go back to login form
-        }
-
-        // Event handler for the Settings button click (optional)
-        private void btnSettings_Click(object sender, EventArgs e)
-        {
-            MessageBox.Show("Settings not implemented yet.");
+            this.Close();
         }
     }
 }

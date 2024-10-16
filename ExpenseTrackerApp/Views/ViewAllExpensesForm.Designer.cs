@@ -2,9 +2,6 @@
 {
     partial class ViewAllExpensesForm
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
         private System.Windows.Forms.Panel pnlSidebar;
         private System.Windows.Forms.PictureBox pbUserProfile;
@@ -15,8 +12,11 @@
         private System.Windows.Forms.Button btnSettings;
         private System.Windows.Forms.Button btnLogout;
         private System.Windows.Forms.Label lblTitle;
+        private System.Windows.Forms.Label lblTotalExpenses;
         private System.Windows.Forms.DataGridView dgvAllExpenses;
         private System.Windows.Forms.Panel pnlHeader;
+        private System.Windows.Forms.TextBox txtSearch;
+        private System.Windows.Forms.Button btnAddExpense;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -48,8 +48,11 @@
             pbUserProfile = new PictureBox();
             lblUserName = new Label();
             lblTitle = new Label();
+            lblTotalExpenses = new Label();
             dgvAllExpenses = new DataGridView();
             pnlHeader = new Panel();
+            txtSearch = new TextBox();
+            btnAddExpense = new Button();
             pnlSidebar.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pbUserProfile).BeginInit();
             ((System.ComponentModel.ISupportInitialize)dgvAllExpenses).BeginInit();
@@ -158,10 +161,18 @@
             lblTitle.ForeColor = Color.White;
             lblTitle.Location = new Point(220, 9);
             lblTitle.Name = "lblTitle";
-            lblTitle.Size = new Size(560, 43);
+            lblTitle.Size = new Size(400, 43);
             lblTitle.TabIndex = 0;
             lblTitle.Text = "View All Expenses";
             lblTitle.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // lblTotalExpenses
+            // 
+            lblTotalExpenses.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            lblTotalExpenses.Location = new Point(850, 90);
+            lblTotalExpenses.Name = "lblTotalExpenses";
+            lblTotalExpenses.Size = new Size(300, 30);
+            lblTotalExpenses.TabIndex = 3;
             // 
             // dgvAllExpenses
             // 
@@ -176,18 +187,41 @@
             // 
             pnlHeader.BackColor = Color.FromArgb(30, 30, 30);
             pnlHeader.Controls.Add(lblTitle);
+            pnlHeader.Controls.Add(txtSearch);
             pnlHeader.Dock = DockStyle.Top;
             pnlHeader.Location = new Point(0, 0);
             pnlHeader.Name = "pnlHeader";
             pnlHeader.Size = new Size(1055, 60);
             pnlHeader.TabIndex = 2;
             // 
+            // txtSearch
+            // 
+            txtSearch.Location = new Point(700, 15);
+            txtSearch.Name = "txtSearch";
+            txtSearch.PlaceholderText = "Search expenses...";
+            txtSearch.Size = new Size(300, 23);
+            txtSearch.TabIndex = 1;
+            txtSearch.TextChanged += txtSearch_TextChanged;
+            // 
+            // btnAddExpense
+            // 
+            btnAddExpense.BackColor = Color.DodgerBlue;
+            btnAddExpense.Location = new Point(850, 150);
+            btnAddExpense.Name = "btnAddExpense";
+            btnAddExpense.Size = new Size(150, 40);
+            btnAddExpense.TabIndex = 4;
+            btnAddExpense.Text = "Add Expense";
+            btnAddExpense.UseVisualStyleBackColor = false;
+            btnAddExpense.Click += btnAddExpense_Click;
+            // 
             // ViewAllExpensesForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1055, 601);
+            Controls.Add(btnAddExpense);
             Controls.Add(dgvAllExpenses);
+            Controls.Add(lblTotalExpenses);
             Controls.Add(pnlSidebar);
             Controls.Add(pnlHeader);
             FormBorderStyle = FormBorderStyle.FixedSingle;
@@ -198,6 +232,7 @@
             ((System.ComponentModel.ISupportInitialize)pbUserProfile).EndInit();
             ((System.ComponentModel.ISupportInitialize)dgvAllExpenses).EndInit();
             pnlHeader.ResumeLayout(false);
+            pnlHeader.PerformLayout();
             ResumeLayout(false);
         }
 

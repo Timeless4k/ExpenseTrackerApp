@@ -11,45 +11,42 @@ namespace ExpenseTrackerApp.Views
 {
     public partial class DashboardForm : Form
     {
+        // Initialize the timer inline to ensure it's non-null
+        private readonly System.Windows.Forms.Timer dashboardTimer = new System.Windows.Forms.Timer();
         private readonly DbContextOptions<ExpenseContext> _options;
         private decimal remainingBudget;
-        private System.Windows.Forms.Timer dashboardTimer; // Use System.Windows.Forms.Timer for UI updates
 
         public DashboardForm()
         {
             InitializeComponent();
 
-            // Create the DbContextOptions for ExpenseContext once, at class level
+            // Initialize DbContext options
             _options = new DbContextOptionsBuilder<ExpenseContext>()
                 .UseMySQL(ConfigurationManager.ConnectionStrings["ExpenseTrackerDB"].ConnectionString)
                 .Options;
 
-            // Initialize the Timer to refresh dashboard data every second
-            dashboardTimer = new System.Windows.Forms.Timer();  // Use Windows Forms Timer
-            dashboardTimer.Interval = 1000;  // 1000 ms = 1 second
-            dashboardTimer.Tick += OnDashboardTimerTick;  // Use Tick instead of Elapsed for Windows Forms Timer
-            dashboardTimer.Start();
-
-            // Load dashboard data initially
-            LoadDashboardData();
+            InitializeDashboardTimer(); // Set up the timer
+            LoadDashboardData(); // Load data initially
         }
 
-        // Method to refresh dashboard data every second
+        private void InitializeDashboardTimer()
+        {
+            dashboardTimer.Interval = 1000; // Set the interval to  seconds
+            dashboardTimer.Tick += OnDashboardTimerTick; // Attach the Tick event
+            dashboardTimer.Start(); // Start the timer
+        }
+
         private void OnDashboardTimerTick(object? sender, EventArgs e)
         {
-            LoadDashboardData();
+            if (this.ContainsFocus) // Refresh only if the dashboard is active
+                LoadDashboardData();
         }
 
-
-        // Load and refresh data on the dashboard
         private void LoadDashboardData()
         {
             if (!SessionManager.IsLoggedIn())
             {
-                MessageBox.Show("You need to log in first.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                LoginForm loginForm = new LoginForm();
-                loginForm.Show();
-                this.Hide();
+                PromptLogin();
                 return;
             }
 
@@ -57,224 +54,205 @@ namespace ExpenseTrackerApp.Views
             {
                 var expenseRepository = new ExpenseRepository(context);
                 var incomeRepository = new IncomeRepository(context);
-
-                // Get the current user's ID and Name from SessionManager
                 var userId = SessionManager.CurrentUser.Id;
+
                 lblUserName.Text = $"Hi, {SessionManager.CurrentUser.FirstName}!";
-
-                // Load recent expenses
-                var expenses = expenseRepository.GetRecentExpensesByUserId(userId);
-                dgvExpenses.DataSource = expenses;
-
-                // Load recent incomes
-                var incomes = incomeRepository.GetRecentIncomesByUserId(userId);
-                dgvIncome.DataSource = incomes;
-
-                // Set the date format for the 'Date' columns (assuming the column name is 'Date')
-                if (dgvExpenses.Columns["Date"] != null)
-                {
-                    dgvExpenses.Columns["Date"].DefaultCellStyle.Format = "d"; // Displays date only
-                }
-
-                if (dgvIncome.Columns["Date"] != null)
-                {
-                    dgvIncome.Columns["Date"].DefaultCellStyle.Format = "d"; // Displays date only
-                }
-
-                // Calculate total budget by summing up all income
-                decimal totalBudget = incomes.Sum(i => i.Amount);
-
-                // Calculate remaining budget (Total Income - Total Expense)
-                decimal totalIncome = incomes.Sum(i => i.Amount);
-                decimal totalExpense = expenses.Sum(e => e.Amount);
-                remainingBudget = totalIncome - totalExpense;
-
-                // Calculate the percentage for the ProgressBar
-                int budgetPercentage = (int)((remainingBudget / totalBudget) * 100);
-
-                // Clamp the value to be within 0 and 100 to avoid out-of-range exceptions
-                budgetPercentage = Math.Max(0, Math.Min(100, budgetPercentage));
-
-                // Update labels and ProgressBar
-                lblTotalBudget.Text = $"Total Budget: ${totalBudget}";
-                lblRemainingBudget.Text = $"Remaining Budget: ${remainingBudget}";
-                pbRemainingBudget.Value = budgetPercentage;
-
-                // Customize table display by hiding unnecessary columns
-                HideUnnecessaryColumns(dgvExpenses, "Id", "UserId");
-                HideUnnecessaryColumns(dgvIncome, "Id", "UserId");
-
-                // Add Edit/Delete columns after loading data
-                AddEditAndDeleteColumns(dgvExpenses);
-                AddEditAndDeleteColumns(dgvIncome);
+                LoadRecentTransactions(expenseRepository, incomeRepository, userId);
+                UpdateBudgetInfo(incomeRepository, expenseRepository, userId);
             }
         }
 
-        private void HideUnnecessaryColumns(DataGridView dataGridView, params string[] columnsToHide)
+        private void PromptLogin()
         {
-            foreach (var column in columnsToHide)
-            {
-                if (dataGridView.Columns[column] != null)
-                {
-                    dataGridView.Columns[column].Visible = false;
-                }
-            }
+            MessageBox.Show("You need to log in first.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            new LoginForm().Show();
+            this.Hide();
         }
 
-        // Add Edit and Delete buttons to DataGridView
-        private void AddEditAndDeleteColumns(DataGridView dataGridView)
+        private void LoadRecentTransactions(ExpenseRepository expenseRepo, IncomeRepository incomeRepo, int userId)
         {
-            if (dataGridView.Columns["ActionEdit"] == null)
-            {
-                var btnEdit = new DataGridViewButtonColumn
-                {
-                    HeaderText = "Edit",
-                    Name = "ActionEdit",
-                    Text = "Edit",
-                    UseColumnTextForButtonValue = true
-                };
-                dataGridView.Columns.Insert(0, btnEdit);
-            }
+            dgvExpenses.DataSource = expenseRepo.GetRecentExpensesByUserId(userId);
+            dgvIncome.DataSource = incomeRepo.GetRecentIncomesByUserId(userId);
 
-            if (dataGridView.Columns["ActionDelete"] == null)
+            FormatDateColumns(dgvExpenses, "Date");
+            FormatDateColumns(dgvIncome, "Date");
+
+            HideUnnecessaryColumns(dgvExpenses, "Id", "UserId");
+            HideUnnecessaryColumns(dgvIncome, "Id", "UserId");
+
+            AddEditAndDeleteColumns(dgvExpenses);
+            AddEditAndDeleteColumns(dgvIncome);
+        }
+
+        private void FormatDateColumns(DataGridView gridView, string columnName)
+        {
+            if (gridView.Columns[columnName] != null)
+                gridView.Columns[columnName].DefaultCellStyle.Format = "d";
+        }
+
+        private void UpdateBudgetInfo(IncomeRepository incomeRepo, ExpenseRepository expenseRepo, int userId)
+        {
+            var incomes = incomeRepo.GetRecentIncomesByUserId(userId);
+            var expenses = expenseRepo.GetRecentExpensesByUserId(userId);
+
+            // Use GetValueOrDefault() to handle nullable decimals
+            decimal totalIncome = incomes.Sum(i => i.Amount.GetValueOrDefault());
+            decimal totalExpense = expenses.Sum(e => e.Amount.GetValueOrDefault());
+
+            remainingBudget = totalIncome - totalExpense;
+            int budgetPercentage = CalculateBudgetPercentage(totalIncome, remainingBudget);
+
+            lblTotalBudget.Text = $"Total Budget: ${totalIncome:F2}";
+            lblRemainingBudget.Text = $"Remaining Budget: ${remainingBudget:F2}";
+            pbRemainingBudget.Value = budgetPercentage;
+            UpdateProgressBarColor(budgetPercentage);
+        }
+
+
+        private int CalculateBudgetPercentage(decimal totalIncome, decimal remaining)
+        {
+            if (totalIncome == 0) return 0;
+            return Math.Max(0, Math.Min(100, (int)((remaining / totalIncome) * 100)));
+        }
+
+        private void UpdateProgressBarColor(int percentage)
+        {
+            if (percentage < 30)
+                pbRemainingBudget.ForeColor = System.Drawing.Color.Green;
+            else if (percentage < 60)
+                pbRemainingBudget.ForeColor = System.Drawing.Color.Yellow;
+            else
+                pbRemainingBudget.ForeColor = System.Drawing.Color.Red;
+        }
+
+        private void HideUnnecessaryColumns(DataGridView gridView, params string[] columns)
+        {
+            foreach (var column in columns)
             {
-                var btnDelete = new DataGridViewButtonColumn
-                {
-                    HeaderText = "Delete",
-                    Name = "ActionDelete",
-                    Text = "Delete",
-                    UseColumnTextForButtonValue = true
-                };
-                dataGridView.Columns.Insert(1, btnDelete);
+                if (gridView.Columns[column] != null)
+                    gridView.Columns[column].Visible = false;
             }
         }
 
-        // Handle the AddExpense button click
+        private void AddEditAndDeleteColumns(DataGridView gridView)
+        {
+            if (!gridView.Columns.Contains("ActionEdit"))
+                gridView.Columns.Insert(0, CreateButtonColumn("ActionEdit", "Edit"));
+
+            if (!gridView.Columns.Contains("ActionDelete"))
+                gridView.Columns.Insert(1, CreateButtonColumn("ActionDelete", "Delete"));
+        }
+
+        private DataGridViewButtonColumn CreateButtonColumn(string name, string text)
+        {
+            return new DataGridViewButtonColumn
+            {
+                HeaderText = text,
+                Name = name,
+                Text = text,
+                UseColumnTextForButtonValue = true
+            };
+        }
+
         private void btnAddExpense_Click(object sender, EventArgs e)
         {
-            AddExpenseForm addExpenseForm = new AddExpenseForm(SessionManager.CurrentUser.Id);
-            addExpenseForm.ShowDialog();  // Open the form modally, dashboard stays open
+            PauseTimerWhileEditing();
+            new AddExpenseForm(SessionManager.CurrentUser.Id).ShowDialog();
+            ResumeTimer();
         }
 
-        // Handle the AddIncome button click
         private void btnAddIncome_Click(object sender, EventArgs e)
         {
-            AddIncomeForm addIncomeForm = new AddIncomeForm(SessionManager.CurrentUser.Id);
-            addIncomeForm.ShowDialog();  // Open the form modally, dashboard stays open
+            PauseTimerWhileEditing();
+            new AddIncomeForm(SessionManager.CurrentUser.Id).ShowDialog();
+            ResumeTimer();
         }
 
-        // Handle the View All Income button click
         private void btnViewAllIncome_Click(object sender, EventArgs e)
         {
-            // Create the ViewAllIncomeForm and show it
-            ViewAllIncomeForm viewAllIncomeForm = new ViewAllIncomeForm(SessionManager.CurrentUser.Id);
-            viewAllIncomeForm.Show();
-
-            // Close the current dashboard form to prevent reopening
+            PauseTimerWhileEditing();
+            new ViewAllIncomeForm(SessionManager.CurrentUser.Id).Show();
             this.Close();
         }
 
-        // Handle the View All Expenses button click
         private void btnViewAllExpenses_Click(object sender, EventArgs e)
         {
-            // Create the ViewAllExpensesForm and show it
-            ViewAllExpensesForm viewAllExpensesForm = new ViewAllExpensesForm(SessionManager.CurrentUser.Id);
-            viewAllExpensesForm.Show();
-
-            // Close the current dashboard form to prevent reopening
+            PauseTimerWhileEditing();
+            new ViewAllExpensesForm(SessionManager.CurrentUser.Id).Show();
             this.Close();
         }
 
-        // Handle the Logout button click
+        private void PauseTimerWhileEditing() => dashboardTimer.Stop();
+        private void ResumeTimer() => dashboardTimer.Start();
+
         private void btnLogout_Click(object sender, EventArgs e)
         {
-            SessionManager.Logout();
-            this.Hide();
-            LoginForm loginForm = new LoginForm();
-            loginForm.Show();
+            var confirmLogout = MessageBox.Show("Are you sure you want to log out?", "Confirm Logout", MessageBoxButtons.YesNo);
+            if (confirmLogout == DialogResult.Yes)
+            {
+                SessionManager.Logout();
+                this.Hide();
+                new LoginForm().Show();
+            }
         }
 
-        // Handle DataGridView Expenses CellContentClick for editing and deleting
         private void dgvExpenses_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex < 0)
-                return; // Ignore header clicks
+            HandleGridViewButtonClick(e, dgvExpenses, "expense");
+        }
 
-            // Handle Edit button click in the DataGridView for Expenses
-            if (e.ColumnIndex == dgvExpenses.Columns["ActionEdit"].Index)
+        private void dgvIncome_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            HandleGridViewButtonClick(e, dgvIncome, "income");
+        }
+
+        private void HandleGridViewButtonClick(DataGridViewCellEventArgs e, DataGridView gridView, string type)
+        {
+            if (e.RowIndex < 0) return;
+
+            var id = (int)gridView.Rows[e.RowIndex].Cells["Id"].Value;
+
+            if (e.ColumnIndex == gridView.Columns["ActionEdit"].Index)
             {
-                int expenseId = (int)dgvExpenses.Rows[e.RowIndex].Cells["Id"].Value;
-                using (EditExpenseForm editExpenseForm = new EditExpenseForm(expenseId))
-                {
-                    DialogResult dialogResult = editExpenseForm.ShowDialog();
-                    if (dialogResult == DialogResult.OK)
-                    {
-                        LoadDashboardData();  // Refresh the dashboard data after the edit
-                    }
-                }
+                ShowEditForm(id, type);
             }
-
-            // Handle Delete button click in the DataGridView for Expenses
-            if (e.ColumnIndex == dgvExpenses.Columns["ActionDelete"].Index)
+            else if (e.ColumnIndex == gridView.Columns["ActionDelete"].Index)
             {
-                int expenseId = (int)dgvExpenses.Rows[e.RowIndex].Cells["Id"].Value;
-                var confirmResult = MessageBox.Show("Are you sure to delete this expense?", "Confirm Delete", MessageBoxButtons.YesNo);
-                if (confirmResult == DialogResult.Yes)
-                {
-                    using (var context = new ExpenseContext(_options))
-                    {
-                        var expenseRepository = new ExpenseRepository(context);
-                        bool success = expenseRepository.Delete(expenseId);
-
-                        if (success)
-                        {
-                            MessageBox.Show("Expense deleted successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            LoadDashboardData(); // Refresh the data after deleting
-                        }
-                        else
-                        {
-                            MessageBox.Show("Failed to delete expense.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                    }
-                }
+                ConfirmAndDeleteRecord(id, type);
             }
         }
 
-        // Handle DataGridView Income CellContentClick for editing and deleting
-        private void dgvIncome_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void ShowEditForm(int id, string type)
         {
-            if (e.RowIndex < 0)
-                return; // Ignore header clicks
+            Form editForm = type == "expense"
+                ? new EditExpenseForm(id)
+                : new EditIncomeForm(id);
 
-            // Handle Edit button click in the DataGridView for Income
-            if (e.ColumnIndex == dgvIncome.Columns["ActionEdit"].Index)
-            {
-                int incomeId = (int)dgvIncome.Rows[e.RowIndex].Cells["Id"].Value;
-                EditIncomeForm editIncomeForm = new EditIncomeForm(incomeId);
-                editIncomeForm.ShowDialog();  // Keep dashboard open
-            }
+            PauseTimerWhileEditing();
+            if (editForm.ShowDialog() == DialogResult.OK)
+                LoadDashboardData();
+            ResumeTimer();
+        }
 
-            // Handle Delete button click in the DataGridView for Income
-            if (e.ColumnIndex == dgvIncome.Columns["ActionDelete"].Index)
+        private void ConfirmAndDeleteRecord(int id, string type)
+        {
+            var confirmResult = MessageBox.Show($"Are you sure you want to delete this {type}?", "Confirm Delete", MessageBoxButtons.YesNo);
+            if (confirmResult == DialogResult.Yes)
             {
-                int incomeId = (int)dgvIncome.Rows[e.RowIndex].Cells["Id"].Value;
-                var confirmResult = MessageBox.Show("Are you sure to delete this income?", "Confirm Delete", MessageBoxButtons.YesNo);
-                if (confirmResult == DialogResult.Yes)
+                using (var context = new ExpenseContext(_options))
                 {
-                    using (var context = new ExpenseContext(_options))
-                    {
-                        var incomeRepository = new IncomeRepository(context);
-                        bool success = incomeRepository.Delete(incomeId);
+                    bool success = type == "expense"
+                        ? new ExpenseRepository(context).Delete(id)
+                        : new IncomeRepository(context).Delete(id);
 
-                        if (success)
-                        {
-                            MessageBox.Show("Income deleted successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            LoadDashboardData(); // Refresh the data after deleting
-                        }
-                        else
-                        {
-                            MessageBox.Show("Failed to delete income.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
+                    if (success)
+                    {
+                        MessageBox.Show($"{type} deleted successfully.", "Success");
+                        LoadDashboardData();
+                    }
+                    else
+                    {
+                        MessageBox.Show($"Failed to delete {type}.", "Error");
                     }
                 }
             }
