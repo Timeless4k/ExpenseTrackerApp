@@ -27,148 +27,158 @@
         // Method to initialize components and UI elements
         private void InitializeComponent()
         {
-            this.lblExpenseName = new System.Windows.Forms.Label();
-            this.txtExpenseName = new System.Windows.Forms.TextBox();
-            this.lblExpenseAmount = new System.Windows.Forms.Label();
-            this.txtExpenseAmount = new System.Windows.Forms.TextBox();
-            this.lblExpenseCategory = new System.Windows.Forms.Label();
-            this.txtExpenseCategory = new System.Windows.Forms.TextBox();
-            this.lblExpenseDate = new System.Windows.Forms.Label();
-            this.dtpExpenseDate = new System.Windows.Forms.DateTimePicker();
-            this.btnAddExpense = new System.Windows.Forms.Button();
-            this.btnCancel = new System.Windows.Forms.Button();
-            this.SuspendLayout();
-
+            lblExpenseName = new Label();
+            txtExpenseName = new TextBox();
+            lblExpenseAmount = new Label();
+            txtExpenseAmount = new TextBox();
+            lblExpenseCategory = new Label();
+            txtExpenseCategory = new TextBox();
+            lblExpenseDate = new Label();
+            dtpExpenseDate = new DateTimePicker();
+            btnAddExpense = new Button();
+            btnCancel = new Button();
+            SuspendLayout();
             // 
             // lblExpenseName
             // 
-            this.lblExpenseName.AutoSize = true;
-            this.lblExpenseName.Location = new System.Drawing.Point(12, 15);
-            this.lblExpenseName.Name = "lblExpenseName";
-            this.lblExpenseName.Size = new System.Drawing.Size(95, 19);
-            this.lblExpenseName.TabIndex = 0;
-            this.lblExpenseName.Text = "Expense Name:";
-            this.lblExpenseName.Font = new Font("Segoe UI", 10, FontStyle.Regular);
+            lblExpenseName.AutoSize = true;
+            lblExpenseName.Font = new Font("Segoe UI", 10F);
+            lblExpenseName.Location = new Point(14, 17);
+            lblExpenseName.Margin = new Padding(4, 0, 4, 0);
+            lblExpenseName.Name = "lblExpenseName";
+            lblExpenseName.Size = new Size(101, 19);
+            lblExpenseName.TabIndex = 0;
+            lblExpenseName.Text = "Expense Name:";
             // 
             // txtExpenseName
             // 
-            this.txtExpenseName.Location = new System.Drawing.Point(150, 12);
-            this.txtExpenseName.Name = "txtExpenseName";
-            this.txtExpenseName.Size = new System.Drawing.Size(220, 25);
-            this.txtExpenseName.TabIndex = 1;
-            this.txtExpenseName.Font = new Font("Segoe UI", 10, FontStyle.Regular);
-            this.txtExpenseName.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.txtExpenseName.ForeColor = System.Drawing.Color.Black;
+            txtExpenseName.BackColor = Color.WhiteSmoke;
+            txtExpenseName.Font = new Font("Segoe UI", 10F);
+            txtExpenseName.ForeColor = Color.Black;
+            txtExpenseName.Location = new Point(175, 14);
+            txtExpenseName.Margin = new Padding(4, 3, 4, 3);
+            txtExpenseName.Name = "txtExpenseName";
+            txtExpenseName.Size = new Size(256, 25);
+            txtExpenseName.TabIndex = 1;
             // 
             // lblExpenseAmount
             // 
-            this.lblExpenseAmount.AutoSize = true;
-            this.lblExpenseAmount.Location = new System.Drawing.Point(12, 55);
-            this.lblExpenseAmount.Name = "lblExpenseAmount";
-            this.lblExpenseAmount.Size = new System.Drawing.Size(110, 19);
-            this.lblExpenseAmount.TabIndex = 2;
-            this.lblExpenseAmount.Text = "Expense Amount:";
-            this.lblExpenseAmount.Font = new Font("Segoe UI", 10, FontStyle.Regular);
+            lblExpenseAmount.AutoSize = true;
+            lblExpenseAmount.Font = new Font("Segoe UI", 10F);
+            lblExpenseAmount.Location = new Point(14, 63);
+            lblExpenseAmount.Margin = new Padding(4, 0, 4, 0);
+            lblExpenseAmount.Name = "lblExpenseAmount";
+            lblExpenseAmount.Size = new Size(115, 19);
+            lblExpenseAmount.TabIndex = 2;
+            lblExpenseAmount.Text = "Expense Amount:";
             // 
             // txtExpenseAmount
             // 
-            this.txtExpenseAmount.Location = new System.Drawing.Point(150, 52);
-            this.txtExpenseAmount.Name = "txtExpenseAmount";
-            this.txtExpenseAmount.Size = new System.Drawing.Size(220, 25);
-            this.txtExpenseAmount.TabIndex = 3;
-            this.txtExpenseAmount.Font = new Font("Segoe UI", 10, FontStyle.Regular);
-            this.txtExpenseAmount.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.txtExpenseAmount.ForeColor = System.Drawing.Color.Black;
+            txtExpenseAmount.BackColor = Color.WhiteSmoke;
+            txtExpenseAmount.Font = new Font("Segoe UI", 10F);
+            txtExpenseAmount.ForeColor = Color.Black;
+            txtExpenseAmount.Location = new Point(175, 60);
+            txtExpenseAmount.Margin = new Padding(4, 3, 4, 3);
+            txtExpenseAmount.Name = "txtExpenseAmount";
+            txtExpenseAmount.Size = new Size(256, 25);
+            txtExpenseAmount.TabIndex = 3;
             // 
             // lblExpenseCategory
             // 
-            this.lblExpenseCategory.AutoSize = true;
-            this.lblExpenseCategory.Location = new System.Drawing.Point(12, 95);
-            this.lblExpenseCategory.Name = "lblExpenseCategory";
-            this.lblExpenseCategory.Size = new System.Drawing.Size(116, 19);
-            this.lblExpenseCategory.TabIndex = 4;
-            this.lblExpenseCategory.Text = "Expense Category:";
-            this.lblExpenseCategory.Font = new Font("Segoe UI", 10, FontStyle.Regular);
+            lblExpenseCategory.AutoSize = true;
+            lblExpenseCategory.Font = new Font("Segoe UI", 10F);
+            lblExpenseCategory.Location = new Point(14, 110);
+            lblExpenseCategory.Margin = new Padding(4, 0, 4, 0);
+            lblExpenseCategory.Name = "lblExpenseCategory";
+            lblExpenseCategory.Size = new Size(121, 19);
+            lblExpenseCategory.TabIndex = 4;
+            lblExpenseCategory.Text = "Expense Category:";
             // 
             // txtExpenseCategory
             // 
-            this.txtExpenseCategory.Location = new System.Drawing.Point(150, 92);
-            this.txtExpenseCategory.Name = "txtExpenseCategory";
-            this.txtExpenseCategory.Size = new System.Drawing.Size(220, 25);
-            this.txtExpenseCategory.TabIndex = 5;
-            this.txtExpenseCategory.Font = new Font("Segoe UI", 10, FontStyle.Regular);
-            this.txtExpenseCategory.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.txtExpenseCategory.ForeColor = System.Drawing.Color.Black;
+            txtExpenseCategory.BackColor = Color.WhiteSmoke;
+            txtExpenseCategory.Font = new Font("Segoe UI", 10F);
+            txtExpenseCategory.ForeColor = Color.Black;
+            txtExpenseCategory.Location = new Point(175, 106);
+            txtExpenseCategory.Margin = new Padding(4, 3, 4, 3);
+            txtExpenseCategory.Name = "txtExpenseCategory";
+            txtExpenseCategory.Size = new Size(256, 25);
+            txtExpenseCategory.TabIndex = 5;
             // 
             // lblExpenseDate
             // 
-            this.lblExpenseDate.AutoSize = true;
-            this.lblExpenseDate.Location = new System.Drawing.Point(12, 135);
-            this.lblExpenseDate.Name = "lblExpenseDate";
-            this.lblExpenseDate.Size = new System.Drawing.Size(87, 19);
-            this.lblExpenseDate.TabIndex = 6;
-            this.lblExpenseDate.Text = "Expense Date:";
-            this.lblExpenseDate.Font = new Font("Segoe UI", 10, FontStyle.Regular);
+            lblExpenseDate.AutoSize = true;
+            lblExpenseDate.Font = new Font("Segoe UI", 10F);
+            lblExpenseDate.Location = new Point(14, 156);
+            lblExpenseDate.Margin = new Padding(4, 0, 4, 0);
+            lblExpenseDate.Name = "lblExpenseDate";
+            lblExpenseDate.Size = new Size(94, 19);
+            lblExpenseDate.TabIndex = 6;
+            lblExpenseDate.Text = "Expense Date:";
             // 
             // dtpExpenseDate
             // 
-            this.dtpExpenseDate.Location = new System.Drawing.Point(150, 132);
-            this.dtpExpenseDate.Name = "dtpExpenseDate";
-            this.dtpExpenseDate.Size = new System.Drawing.Size(220, 25);
-            this.dtpExpenseDate.TabIndex = 7;
-            this.dtpExpenseDate.Font = new Font("Segoe UI", 10, FontStyle.Regular);
-            this.dtpExpenseDate.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.dtpExpenseDate.ForeColor = System.Drawing.Color.Black;
+            dtpExpenseDate.BackColor = Color.WhiteSmoke;
+            dtpExpenseDate.Font = new Font("Segoe UI", 10F);
+            dtpExpenseDate.ForeColor = Color.Black;
+            dtpExpenseDate.Location = new Point(175, 152);
+            dtpExpenseDate.Margin = new Padding(4, 3, 4, 3);
+            dtpExpenseDate.Name = "dtpExpenseDate";
+            dtpExpenseDate.Size = new Size(256, 25);
+            dtpExpenseDate.TabIndex = 7;
             // 
             // btnAddExpense
             // 
-            this.btnAddExpense.Location = new System.Drawing.Point(150, 170);
-            this.btnAddExpense.Name = "btnAddExpense";
-            this.btnAddExpense.Size = new System.Drawing.Size(100, 35);
-            this.btnAddExpense.TabIndex = 8;
-            this.btnAddExpense.Text = "Add Expense";
-            this.btnAddExpense.UseVisualStyleBackColor = true;
-            this.btnAddExpense.BackColor = System.Drawing.Color.SteelBlue;
-            this.btnAddExpense.ForeColor = System.Drawing.Color.White;
-            this.btnAddExpense.Font = new Font("Segoe UI", 10, FontStyle.Bold);
-            this.btnAddExpense.FlatStyle = FlatStyle.Flat;
-            this.btnAddExpense.FlatAppearance.BorderSize = 0;
-            this.btnAddExpense.Click += new System.EventHandler(this.BtnAddExpense_Click);
+            btnAddExpense.BackColor = Color.SteelBlue;
+            btnAddExpense.FlatAppearance.BorderSize = 0;
+            btnAddExpense.FlatStyle = FlatStyle.Flat;
+            btnAddExpense.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnAddExpense.ForeColor = Color.White;
+            btnAddExpense.Location = new Point(175, 196);
+            btnAddExpense.Margin = new Padding(4, 3, 4, 3);
+            btnAddExpense.Name = "btnAddExpense";
+            btnAddExpense.Size = new Size(117, 40);
+            btnAddExpense.TabIndex = 8;
+            btnAddExpense.Text = "Add Expense";
+            btnAddExpense.UseVisualStyleBackColor = false;
+            btnAddExpense.Click += BtnAddExpense_Click;
             // 
             // btnCancel
             // 
-            this.btnCancel.Location = new System.Drawing.Point(270, 170);
-            this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(100, 35);
-            this.btnCancel.TabIndex = 9;
-            this.btnCancel.Text = "Cancel";
-            this.btnCancel.UseVisualStyleBackColor = true;
-            this.btnCancel.BackColor = System.Drawing.Color.LightGray;
-            this.btnCancel.ForeColor = System.Drawing.Color.Black;
-            this.btnCancel.Font = new Font("Segoe UI", 10, FontStyle.Regular);
-            this.btnCancel.FlatStyle = FlatStyle.Flat;
-            this.btnCancel.FlatAppearance.BorderSize = 0;
-            this.btnCancel.Click += new System.EventHandler(this.BtnCancel_Click);
+            btnCancel.BackColor = Color.LightGray;
+            btnCancel.FlatAppearance.BorderSize = 0;
+            btnCancel.FlatStyle = FlatStyle.Flat;
+            btnCancel.Font = new Font("Segoe UI", 10F);
+            btnCancel.ForeColor = Color.Black;
+            btnCancel.Location = new Point(315, 196);
+            btnCancel.Margin = new Padding(4, 3, 4, 3);
+            btnCancel.Name = "btnCancel";
+            btnCancel.Size = new Size(117, 40);
+            btnCancel.TabIndex = 9;
+            btnCancel.Text = "Cancel";
+            btnCancel.UseVisualStyleBackColor = false;
+            btnCancel.Click += BtnCancel_Click;
             // 
             // AddExpenseForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(400, 220);
-            this.Controls.Add(this.btnCancel);
-            this.Controls.Add(this.btnAddExpense);
-            this.Controls.Add(this.dtpExpenseDate);
-            this.Controls.Add(this.lblExpenseDate);
-            this.Controls.Add(this.txtExpenseCategory);
-            this.Controls.Add(this.lblExpenseCategory);
-            this.Controls.Add(this.txtExpenseAmount);
-            this.Controls.Add(this.lblExpenseAmount);
-            this.Controls.Add(this.txtExpenseName);
-            this.Controls.Add(this.lblExpenseName);
-            this.Name = "AddExpenseForm";
-            this.Text = "Add Expense";
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(467, 254);
+            Controls.Add(btnCancel);
+            Controls.Add(btnAddExpense);
+            Controls.Add(dtpExpenseDate);
+            Controls.Add(lblExpenseDate);
+            Controls.Add(txtExpenseCategory);
+            Controls.Add(lblExpenseCategory);
+            Controls.Add(txtExpenseAmount);
+            Controls.Add(lblExpenseAmount);
+            Controls.Add(txtExpenseName);
+            Controls.Add(lblExpenseName);
+            Margin = new Padding(4, 3, 4, 3);
+            Name = "AddExpenseForm";
+            Text = "Add Expense";
+            ResumeLayout(false);
+            PerformLayout();
         }
     }
 }

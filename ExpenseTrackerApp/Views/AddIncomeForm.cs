@@ -5,6 +5,8 @@ using ExpenseTrackerApp.Data;
 using ExpenseTrackerApp.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Configuration;
+using System.Windows.Forms;
+using System.Drawing;
 
 namespace ExpenseTrackerApp.Views
 {
@@ -34,7 +36,21 @@ namespace ExpenseTrackerApp.Views
             {
                 // Get user inputs
                 string source = txtIncomeSource.Text.Trim();
-                decimal amount = decimal.Parse(txtIncomeAmount.Text.Trim());
+
+                if (string.IsNullOrEmpty(source))
+                {
+                    MessageBox.Show("Please enter a valid income source.",
+                        "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                if (!decimal.TryParse(txtIncomeAmount.Text.Trim(), out decimal amount) || amount <= 0)
+                {
+                    MessageBox.Show("Please enter a valid positive amount.",
+                        "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
                 DateTime date = dtpIncomeDate.Value;
 
                 // Call the IncomeController to add the income
@@ -42,54 +58,54 @@ namespace ExpenseTrackerApp.Views
 
                 if (success)
                 {
-                    MessageBox.Show("Income added successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    ClearFields(); // Reset fields after successful submission
+                    MessageBox.Show("Income added successfully!",
+                        "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    // Close the form immediately with DialogResult OK
+                    this.DialogResult = DialogResult.OK;
+                    this.Close();
                 }
                 else
                 {
-                    MessageBox.Show("Failed to add income. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Failed to add income. Please try again.",
+                        "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             catch (FormatException)
             {
-                MessageBox.Show("Please enter a valid amount.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Please enter a valid amount.",
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"An error occurred: {ex.Message}",
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-
-        // Clears all fields in the form
-        private void ClearFields()
-        {
-            txtIncomeSource.Clear();
-            txtIncomeAmount.Clear();
-            dtpIncomeDate.Value = DateTime.Now; // Reset date picker to current date
         }
 
         // Button click event handler to close the form
         private void BtnCancel_Click(object sender, EventArgs e)
         {
-            this.Close(); // Close the form when user cancels
+            this.DialogResult = DialogResult.Cancel;
+            this.Close();
         }
 
         // Customize UI to make it more modern
         private void CustomizeUI()
         {
             // Set background color
-            this.BackColor = System.Drawing.Color.White;
+            this.BackColor = Color.White;
 
             // Customize buttons
             btnAddIncome.FlatStyle = FlatStyle.Flat;
-            btnAddIncome.BackColor = System.Drawing.Color.SteelBlue;
-            btnAddIncome.ForeColor = System.Drawing.Color.White;
+            btnAddIncome.BackColor = Color.SteelBlue;
+            btnAddIncome.ForeColor = Color.White;
             btnAddIncome.FlatAppearance.BorderSize = 0;
             btnAddIncome.Font = new Font("Segoe UI", 10, FontStyle.Bold);
 
             btnCancel.FlatStyle = FlatStyle.Flat;
-            btnCancel.BackColor = System.Drawing.Color.LightGray;
-            btnCancel.ForeColor = System.Drawing.Color.Black;
+            btnCancel.BackColor = Color.LightGray;
+            btnCancel.ForeColor = Color.Black;
             btnCancel.FlatAppearance.BorderSize = 0;
             btnCancel.Font = new Font("Segoe UI", 10);
 
@@ -100,11 +116,12 @@ namespace ExpenseTrackerApp.Views
                 {
                     control.Font = new Font("Segoe UI", 10);
                 }
+
                 if (control is TextBox || control is DateTimePicker)
                 {
                     control.Font = new Font("Segoe UI", 10);
-                    control.BackColor = System.Drawing.Color.WhiteSmoke;
-                    control.ForeColor = System.Drawing.Color.Black;
+                    control.BackColor = Color.WhiteSmoke;
+                    control.ForeColor = Color.Black;
                 }
             }
         }

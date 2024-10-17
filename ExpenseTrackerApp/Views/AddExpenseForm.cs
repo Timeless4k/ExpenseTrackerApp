@@ -5,6 +5,7 @@ using ExpenseTrackerApp.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Configuration;
 using System.Windows.Forms;
+using System.Drawing;
 
 namespace ExpenseTrackerApp.Views
 {
@@ -26,62 +27,87 @@ namespace ExpenseTrackerApp.Views
             CustomizeUI();
         }
 
+        // Add Expense button click event handler
         private void BtnAddExpense_Click(object sender, EventArgs e)
         {
             try
             {
                 string name = txtExpenseName.Text.Trim();
-                decimal amount = decimal.Parse(txtExpenseAmount.Text.Trim());
+
+                if (string.IsNullOrEmpty(name))
+                {
+                    MessageBox.Show("Please enter a valid expense name.",
+                        "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                if (!decimal.TryParse(txtExpenseAmount.Text.Trim(), out decimal amount) || amount <= 0)
+                {
+                    MessageBox.Show("Please enter a valid positive amount.",
+                        "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
                 string category = txtExpenseCategory.Text.Trim();
+                if (string.IsNullOrEmpty(category))
+                {
+                    MessageBox.Show("Please enter a valid expense category.",
+                        "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
                 DateTime date = dtpExpenseDate.Value;
 
                 bool success = _expenseController.AddExpense(_userId, name, amount, category, date);
 
                 if (success)
                 {
-                    MessageBox.Show("Expense added successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    ClearFields();
+                    MessageBox.Show("Expense added successfully!",
+                        "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    // Set DialogResult to OK and close the form
+                    this.DialogResult = DialogResult.OK;
+                    this.Close(); // Close the form immediately
                 }
                 else
                 {
-                    MessageBox.Show("Failed to add expense. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Failed to add expense. Please try again.",
+                        "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             catch (FormatException)
             {
-                MessageBox.Show("Please enter a valid amount.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Please enter a valid amount.",
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"An error occurred: {ex.Message}",
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        private void ClearFields()
-        {
-            txtExpenseName.Clear();
-            txtExpenseAmount.Clear();
-            txtExpenseCategory.Clear();
-            dtpExpenseDate.Value = DateTime.Now;
-        }
-
+        // Cancel button click event handler
         private void BtnCancel_Click(object sender, EventArgs e)
         {
+            this.DialogResult = DialogResult.Cancel;
             this.Close();
         }
 
+        // Customize UI appearance
         private void CustomizeUI()
         {
-            this.BackColor = System.Drawing.Color.White;
+            this.BackColor = Color.White;
+
             btnAddExpense.FlatStyle = FlatStyle.Flat;
-            btnAddExpense.BackColor = System.Drawing.Color.SteelBlue;
-            btnAddExpense.ForeColor = System.Drawing.Color.White;
+            btnAddExpense.BackColor = Color.SteelBlue;
+            btnAddExpense.ForeColor = Color.White;
             btnAddExpense.FlatAppearance.BorderSize = 0;
             btnAddExpense.Font = new Font("Segoe UI", 10, FontStyle.Bold);
 
             btnCancel.FlatStyle = FlatStyle.Flat;
-            btnCancel.BackColor = System.Drawing.Color.LightGray;
-            btnCancel.ForeColor = System.Drawing.Color.Black;
+            btnCancel.BackColor = Color.LightGray;
+            btnCancel.ForeColor = Color.Black;
             btnCancel.FlatAppearance.BorderSize = 0;
             btnCancel.Font = new Font("Segoe UI", 10);
 
@@ -91,11 +117,12 @@ namespace ExpenseTrackerApp.Views
                 {
                     control.Font = new Font("Segoe UI", 10);
                 }
+
                 if (control is TextBox || control is DateTimePicker)
                 {
                     control.Font = new Font("Segoe UI", 10);
-                    control.BackColor = System.Drawing.Color.WhiteSmoke;
-                    control.ForeColor = System.Drawing.Color.Black;
+                    control.BackColor = Color.WhiteSmoke;
+                    control.ForeColor = Color.Black;
                 }
             }
         }

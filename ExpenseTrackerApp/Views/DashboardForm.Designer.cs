@@ -90,6 +90,7 @@
             // 
             // btnDashboard
             // 
+            btnDashboard.BackColor = Color.DodgerBlue;
             btnDashboard.FlatStyle = FlatStyle.Flat;
             btnDashboard.ForeColor = Color.White;
             btnDashboard.Location = new Point(25, 200);
@@ -97,6 +98,7 @@
             btnDashboard.Size = new Size(150, 40);
             btnDashboard.TabIndex = 2;
             btnDashboard.Text = "Dashboard";
+            btnDashboard.UseVisualStyleBackColor = false;
             // 
             // btnViewAllIncome
             // 

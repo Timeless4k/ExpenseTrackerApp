@@ -101,6 +101,7 @@
             // 
             // btnViewAllExpenses
             // 
+            btnViewAllExpenses.BackColor = Color.DodgerBlue;
             btnViewAllExpenses.FlatStyle = FlatStyle.Flat;
             btnViewAllExpenses.ForeColor = Color.White;
             btnViewAllExpenses.Location = new Point(25, 274);
@@ -108,7 +109,7 @@
             btnViewAllExpenses.Size = new Size(150, 40);
             btnViewAllExpenses.TabIndex = 4;
             btnViewAllExpenses.Text = "View All Expenses";
-            btnViewAllExpenses.UseVisualStyleBackColor = true;
+            btnViewAllExpenses.UseVisualStyleBackColor = false;
             // 
             // btnViewAllIncome
             // 

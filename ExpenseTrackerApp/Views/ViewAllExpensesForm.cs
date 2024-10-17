@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Collections.Generic; // Needed for List<T>
 using System.Windows.Forms;
 using ExpenseTrackerApp.Data;
 using ExpenseTrackerApp.Models;
@@ -20,12 +19,10 @@ namespace ExpenseTrackerApp.Views
             InitializeComponent();
             _userId = userId;
 
-            // Create DbContextOptions for ExpenseContext
             _options = new DbContextOptionsBuilder<ExpenseContext>()
                 .UseMySQL(ConfigurationManager.ConnectionStrings["ExpenseTrackerDB"].ConnectionString)
                 .Options;
 
-            // Set user name in the label
             if (SessionManager.IsLoggedIn())
             {
                 lblUserName.Text = $"Hi, {SessionManager.CurrentUser.FirstName}!";
@@ -35,76 +32,151 @@ namespace ExpenseTrackerApp.Views
                 lblUserName.Text = "Hi, Guest!";
             }
 
-            LoadExpenses(); // Load expenses data
+            LoadExpenses(); // Load expenses on form load
         }
 
-        // Load all expenses into the DataGridView
         private void LoadExpenses()
         {
             using (var context = new ExpenseContext(_options))
             {
-                var expenseRepository = new ExpenseRepository(context);
-
-                // Fetch all expenses for the user
-                var expenses = expenseRepository.GetRecentExpensesByUserId(_userId);
+                var expenses = context.Expenses
+                    .Where(e => e.UserId == _userId)
+                    .ToList();
 
                 dgvAllExpenses.DataSource = expenses;
 
-                // Calculate the total expenses, handling potential null values
                 var totalAmount = expenses.Sum(e => e.Amount ?? 0);
                 lblTotalExpenses.Text = $"Total Expenses: ${totalAmount:F2}";
 
-                // Safely format the 'Date' column to display only the date
-                var dateColumn = dgvAllExpenses.Columns["Date"];
-                if (dateColumn != null && dateColumn.DefaultCellStyle != null)
+                if (dgvAllExpenses.Columns["Date"] != null)
                 {
-                    dateColumn.DefaultCellStyle.Format = "d";
-                }
-                else
-                {
-                    MessageBox.Show("Date column or DefaultCellStyle is missing.",
-                        "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    dgvAllExpenses.Columns["Date"].DefaultCellStyle.Format = "d";
                 }
 
-                // Hide unnecessary columns
                 HideUnnecessaryColumns(dgvAllExpenses, "Id", "UserId");
+                AddEditDeleteButtons();
             }
         }
 
-
-        // Method to hide unnecessary columns in the DataGridView
-        private void HideUnnecessaryColumns(DataGridView dataGridView, params string[] columnsToHide)
+        private void AddEditDeleteButtons()
         {
-            foreach (var column in columnsToHide)
+            if (!dgvAllExpenses.Columns.Contains("Edit"))
             {
-                if (dataGridView.Columns[column] != null)
+                var editButton = new DataGridViewButtonColumn
                 {
-                    dataGridView.Columns[column].Visible = false;
+                    Name = "Edit",
+                    Text = "Edit",
+                    UseColumnTextForButtonValue = true,
+                    HeaderText = "Action"
+                };
+                dgvAllExpenses.Columns.Add(editButton);
+            }
+
+            if (!dgvAllExpenses.Columns.Contains("Delete"))
+            {
+                var deleteButton = new DataGridViewButtonColumn
+                {
+                    Name = "Delete",
+                    Text = "Delete",
+                    UseColumnTextForButtonValue = true
+                };
+                dgvAllExpenses.Columns.Add(deleteButton);
+            }
+
+            dgvAllExpenses.CellContentClick -= DgvAllExpenses_CellContentClick;
+            dgvAllExpenses.CellContentClick += DgvAllExpenses_CellContentClick;
+        }
+
+        private void DgvAllExpenses_CellContentClick(object? sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0)
+            {
+                var expenseId = (int)dgvAllExpenses.Rows[e.RowIndex].Cells["Id"].Value;
+
+                if (dgvAllExpenses.Columns[e.ColumnIndex].Name == "Edit")
+                {
+                    OpenEditExpenseForm(expenseId);
+                }
+                else if (dgvAllExpenses.Columns[e.ColumnIndex].Name == "Delete")
+                {
+                    DeleteExpense(expenseId);
                 }
             }
         }
 
-        // Search expenses by criteria (name, category, or amount)
-        private void txtSearch_TextChanged(object sender, EventArgs e)
+        private void OpenEditExpenseForm(int expenseId)
+        {
+            var editForm = new EditExpenseForm(expenseId);
+            if (editForm.ShowDialog() == DialogResult.OK)
+            {
+                LoadExpenses();
+            }
+        }
+
+        private void DeleteExpense(int expenseId)
+        {
+            var confirmResult = MessageBox.Show(
+                "Are you sure you want to delete this expense?",
+                "Confirm Delete",
+                MessageBoxButtons.YesNo);
+
+            if (confirmResult == DialogResult.Yes)
+            {
+                using (var context = new ExpenseContext(_options))
+                {
+                    var expense = context.Expenses.Find(expenseId);
+                    if (expense != null)
+                    {
+                        context.Expenses.Remove(expense);
+                        context.SaveChanges();
+                        LoadExpenses();
+                    }
+                }
+            }
+        }
+
+        private void txtSearch_TextChanged(object? sender, EventArgs e)
         {
             using (var context = new ExpenseContext(_options))
             {
                 var searchQuery = txtSearch.Text.ToLower();
-
                 var filteredExpenses = context.Expenses
                     .Where(e => e.UserId == _userId &&
-                                (
-                                    (e.Name != null && e.Name.ToLower().Contains(searchQuery)) ||
-                                    (e.Category != null && e.Category.ToLower().Contains(searchQuery)) ||
-                                    (e.Amount.HasValue && e.Amount.Value.ToString().Contains(searchQuery))
-                                ))
+                        (
+                            (e.Name != null && e.Name.ToLower().Contains(searchQuery)) ||
+                            (e.Category != null && e.Category.ToLower().Contains(searchQuery)) ||
+                            (e.Amount.HasValue && e.Amount.Value.ToString().Contains(searchQuery)) ||
+                            e.Date.ToString("d").Contains(searchQuery)
+                        ))
                     .ToList();
 
                 dgvAllExpenses.DataSource = filteredExpenses;
+
+                var totalFilteredAmount = filteredExpenses.Sum(e => e.Amount ?? 0);
+                lblTotalExpenses.Text = $"Total Expenses: ${totalFilteredAmount:F2}";
             }
         }
 
-        // Event handler for Dashboard button click
+        private void HideUnnecessaryColumns(DataGridView gridView, params string[] columnsToHide)
+        {
+            foreach (var column in columnsToHide)
+            {
+                if (gridView.Columns[column] != null)
+                {
+                    gridView.Columns[column].Visible = false;
+                }
+            }
+        }
+
+        private void btnAddExpense_Click(object sender, EventArgs e)
+        {
+            var addExpenseForm = new AddExpenseForm(_userId);
+            if (addExpenseForm.ShowDialog() == DialogResult.OK)
+            {
+                LoadExpenses();
+            }
+        }
+
         private void btnDashboard_Click(object sender, EventArgs e)
         {
             var dashboardForm = new DashboardForm();
@@ -112,7 +184,6 @@ namespace ExpenseTrackerApp.Views
             this.Close();
         }
 
-        // Event handler for View All Income button click
         private void btnViewAllIncome_Click(object sender, EventArgs e)
         {
             var incomeForm = new ViewAllIncomeForm(_userId);
@@ -120,27 +191,17 @@ namespace ExpenseTrackerApp.Views
             this.Close();
         }
 
-        // Event handler for Settings button click
-        private void btnSettings_Click(object sender, EventArgs e)
-        {
-            MessageBox.Show("Settings are under development.");
-        }
-        // Event handler for Add Expense button click
-        private void btnAddExpense_Click(object sender, EventArgs e)
-        {
-            var addExpenseForm = new AddExpenseForm(_userId);
-            addExpenseForm.ShowDialog();
-            LoadExpenses(); // Refresh the expenses after adding
-        }
-
-
-        // Event handler for Logout button click
         private void btnLogout_Click(object sender, EventArgs e)
         {
             SessionManager.Logout();
             var loginForm = new LoginForm();
             loginForm.Show();
             this.Close();
+        }
+
+        private void btnSettings_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Settings are under development.");
         }
     }
 }
